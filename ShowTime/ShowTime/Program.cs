@@ -1,11 +1,23 @@
+using Microsoft.EntityFrameworkCore;
 using ShowTime.Client.Pages;
 using ShowTime.Components;
+using ShowTime.DataAccess;
+using ShowTime.DataAccess.Models;
+using ShowTime.DataAccess.Repositories.Abstractions;
+using ShowTime.DataAccess.Repositories.Implementations;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveWebAssemblyComponents();
+
+var connectionString = builder.Configuration.GetConnectionString("ShowTimeContext");
+builder.Services.AddDbContext<ShowtimeDbContext>(options =>
+    options.UseSqlServer(connectionString));
+
+builder.Services.AddTransient<IRepository<Artist>, GenericRepository<Artist>>();
 
 var app = builder.Build();
 
