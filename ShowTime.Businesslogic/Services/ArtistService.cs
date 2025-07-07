@@ -47,7 +47,7 @@ namespace ShowTime.Businesslogic.Services
             
 
         }
-        public async Task<IEnumerable<ArtistGetDto>> getAllArtistsAsync()
+        public async Task<IList<ArtistGetDto>> getAllArtistsAsync()
         {
             try
             {
@@ -59,7 +59,7 @@ namespace ShowTime.Businesslogic.Services
                     ImageUrl = artist.Image,
                     Genre = artist.Genre,
                     
-                });
+                }).ToList();
             }
             catch (Exception ex)
             {
@@ -67,28 +67,63 @@ namespace ShowTime.Businesslogic.Services
                 throw new Exception("An error occurred while retrieving artists.", ex);
             }
         }
-        public Task AddArtistAsync(Artist artist)
+        public async Task AddArtistAsync(ArtistCreateDto artistCreateDto)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var artist = new Artist
+                {
+                    Name = artistCreateDto.Name,
+                    Image = artistCreateDto.ImageUrl,
+                    Genre = artistCreateDto.Genre,
+                };
+                await _artistRepository.Add(artist);
+            }
+            catch (Exception ex)
+            {
+                // Log the exception (not implemented here)
+                throw new Exception("An error occurred while adding the artist.", ex);
+            }
         }
-        public Task UpdateArtistAsync(Artist artist)
+        public async Task UpdateArtistAsync(int id, UpdateArtistDto artistGetdto)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var artist = await _artistRepository.GetById(id);
+                if (artist == null)
+                {
+                    throw new KeyNotFoundException($"Artist with ID {id} not found.");
+                }
+                artist.Name = artistGetdto.Name;
+                artist.Image = artistGetdto.ImageUrl;
+                artist.Genre = artistGetdto.Genre;
+                await _artistRepository.Update(artist);
+            } 
+            catch (Exception ex)
+            {
+                
+                throw new Exception("An error occurred while updating the artist.", ex);
+            }
+            
         }
-        public Task DeleteArtistAsync(int id)
+        public async Task DeleteArtistAsync(int id)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var artist = await _artistRepository.GetById(id);
+                if (artist == null)
+                {
+                    throw new KeyNotFoundException($"Artist with ID {id} not found.");
+                }
+                await _artistRepository.Delete(id);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("An error occurred while deleting the artist.", ex);
+            }
         }
 
-        Task<Artist?> IArtistService.getArtistbyIdAsync(int id)
-        {
-            throw new NotImplementedException();
-        }
-
-        Task<IEnumerable<Artist>> IArtistService.getAllArtistsAsync()
-        {
-            throw new NotImplementedException();
-        }
+       
     }
     
     

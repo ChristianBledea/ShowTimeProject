@@ -1,0 +1,81 @@
+﻿@page "/ArtistsPage"
+@using ShowTime.Businesslogic.Abstractions
+@using ShowTime.Businesslogic.Dtos
+@using ShowTime.Businesslogic.Services
+@using Microsoft.AspNetCore.Components.Authorization
+@inject IArtistService ArtistService
+@inject NavigationManager NavigationManager
+
+@rendermode InteractiveServer
+
+<h3>Artists</h3>
+
+@if (isLoading)
+{
+    <div class="d-flex align-items-center">
+        <div class="spinner-border text-primary me-2" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+        <span>Loading artists...</span>
+    </div>
+}
+else if (artists.Count == 0)
+{
+    <p>No artists registered</p>
+}
+else
+{
+    <div class="row">
+        @foreach (var artist in artists)
+        {
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                    <img src="@artist.ImageUrl" alt="@artist.Name" class="card-img-top" style="height: 180px; object-fit: cover;" />
+                    <div class="card-body">
+                        <h5 class="card-title">@artist.Name</h5>
+                        <p class="card-text">@artist.Genre</p>
+                        
+                        <AuthorizeView Roles="Admin">
+                            <div class="d-flex justify-content-between">
+                                <button type="button" class="btn btn-danger btn-sm" @onclick="() => DeleteArtist(artist.Id)">
+                                    <span class="bi bi-trash me-1"></span> Delete
+                                </button>
+                                <button type="button" class="btn btn-secondary btn-sm" @onclick="() => UpdateArtist(artist.Id)">
+                                    <span class="bi bi-pencil-square me-1"></span> Update
+                                </button>
+                            </div>
+                        </AuthorizeView>
+                        
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+@code {
+    private IList<ArtistGetDto> artists = new List<ArtistGetDto>();
+    private bool isLoading = true;
+    private bool isAdmin = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        isLoading = true;
+        artists = await ArtistService.getAllArtistsAsync();
+
+        
+
+        isLoading = false;
+    }
+
+    private async Task DeleteArtist(int id)
+    {
+        await ArtistService.DeleteArtistAsync(id);
+        artists = await ArtistService.getAllArtistsAsync();
+    }
+
+    private void UpdateArtist(int id)
+    {
+        NavigationManager.NavigateTo($"/UpdateArtist/{id}");
+    }
+}

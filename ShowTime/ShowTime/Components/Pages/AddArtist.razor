@@ -1,0 +1,45 @@
+﻿@page "/AddArtist"
+@using ShowTime.Businesslogic.Abstractions
+@using ShowTime.Businesslogic.Dtos
+@inject IArtistService ArtistService
+
+<h3 class="mb-4">Add New Artist</h3>
+<EditForm Model="newArtist" OnValidSubmit="AddNewArtist" FormName="AddArtistForm">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="mb-3">
+        <label for="artistName" class="form-label">Name</label>
+        <InputText id="artistName" class="form-control" @bind-Value="newArtist.Name" />
+    </div>
+    <div class="mb-3">
+        <label for="artistImage" class="form-label">Image URL</label>
+        <InputText id="artistImage" class="form-control" @bind-Value="newArtist.ImageUrl" />
+    </div>
+    <div class="mb-3">
+        <label for="artistGenre" class="form-label">Genre</label>
+        <InputText id="artistGenre" class="form-control" @bind-Value="newArtist.Genre" />
+    </div>
+    <button class="btn btn-primary" type="submit">
+        <span class="bi bi-person-plus-fill align-middle me-2"></span>
+        Add Artist
+    </button>
+</EditForm>
+
+@if (successMessage != null)
+{
+    <div class="alert alert-success mt-3">@successMessage</div>
+}
+
+@code {
+    [SupplyParameterFromForm]
+    private ArtistCreateDto newArtist { get; set; } = new();
+    private string? successMessage;
+
+    private async Task AddNewArtist()
+    {
+        await ArtistService.AddArtistAsync(newArtist);
+        successMessage = "Artist added successfully!";
+        newArtist = new();
+    }
+}

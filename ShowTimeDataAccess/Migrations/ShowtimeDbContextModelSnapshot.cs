@@ -22,6 +22,21 @@ namespace ShowTime.DataAccess.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("FestivalUser", b =>
+                {
+                    b.Property<int>("FestivalsId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("UsersId")
+                        .HasColumnType("int");
+
+                    b.HasKey("FestivalsId", "UsersId");
+
+                    b.HasIndex("UsersId");
+
+                    b.ToTable("FestivalUser");
+                });
+
             modelBuilder.Entity("ShowTime.DataAccess.Models.Artist", b =>
                 {
                     b.Property<int>("Id")
@@ -133,6 +148,30 @@ namespace ShowTime.DataAccess.Migrations
                     b.ToTable("Lineups", (string)null);
                 });
 
+            modelBuilder.Entity("ShowTime.DataAccess.Models.Role", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
+
+                    b.ToTable("Roles", (string)null);
+                });
+
             modelBuilder.Entity("ShowTime.DataAccess.Models.User", b =>
                 {
                     b.Property<int>("Id")
@@ -143,23 +182,40 @@ namespace ShowTime.DataAccess.Migrations
 
                     b.Property<string>("Email")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("FestivalId")
-                        .HasColumnType("int");
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
 
                     b.Property<string>("Password")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(511)
+                        .HasColumnType("nvarchar(511)");
 
-                    b.Property<int>("Role")
+                    b.Property<int>("RoleId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("FestivalId");
+                    b.HasIndex("Email")
+                        .IsUnique();
+
+                    b.HasIndex("RoleId");
 
                     b.ToTable("Users", (string)null);
+                });
+
+            modelBuilder.Entity("FestivalUser", b =>
+                {
+                    b.HasOne("ShowTime.DataAccess.Models.Festival", null)
+                        .WithMany()
+                        .HasForeignKey("FestivalsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ShowTime.DataAccess.Models.User", null)
+                        .WithMany()
+                        .HasForeignKey("UsersId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("ShowTime.DataAccess.Models.Booking", b =>
@@ -202,9 +258,13 @@ namespace ShowTime.DataAccess.Migrations
 
             modelBuilder.Entity("ShowTime.DataAccess.Models.User", b =>
                 {
-                    b.HasOne("ShowTime.DataAccess.Models.Festival", null)
+                    b.HasOne("ShowTime.DataAccess.Models.Role", "Role")
                         .WithMany("Users")
-                        .HasForeignKey("FestivalId");
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Role");
                 });
 
             modelBuilder.Entity("ShowTime.DataAccess.Models.Artist", b =>
@@ -217,7 +277,10 @@ namespace ShowTime.DataAccess.Migrations
                     b.Navigation("Bookings");
 
                     b.Navigation("Lineups");
+                });
 
+            modelBuilder.Entity("ShowTime.DataAccess.Models.Role", b =>
+                {
                     b.Navigation("Users");
                 });
 

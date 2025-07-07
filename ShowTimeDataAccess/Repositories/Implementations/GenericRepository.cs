@@ -62,19 +62,38 @@ namespace ShowTime.DataAccess.Repositories.Implementations
             return entity;
         }
 
-        public async Task Update(T entity)
+        public virtual async Task Update(T entity)
         {
-            if (entity == null)
+            try
             {
-                throw new ArgumentNullException(nameof(entity), "Entity cannot be null");
+                if (entity == null)
+                {
+                    throw new ArgumentNullException(nameof(entity), "Entity cannot be null");
+                }
+
+                _context.Set<T>().Update(entity);
+                await _context.SaveChangesAsync();
             }
-            var entry = _context.Entry(entity);
-            if (entry.State == EntityState.Detached)
+            catch (ArgumentNullException ex)
             {
-                _context.Set<T>().Attach(entity);
+                Console.WriteLine($"Validation error in Update: {ex.Message}");
+                throw;
             }
-            entry.State = EntityState.Modified;
-            await _context.SaveChangesAsync();
+            catch (DbUpdateConcurrencyException ex)
+            {
+                Console.WriteLine($"Concurrency error in Update: {ex.Message}");
+                throw new InvalidOperationException("The entity was modified by another process. Please refresh and try again.", ex);
+            }
+            catch (DbUpdateException ex)
+            {
+                Console.WriteLine($"Database update error in Update: {ex.Message}");
+                throw new InvalidOperationException("Failed to update entity in database", ex);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Unexpected error in Update: {ex.Message}");
+                throw new InvalidOperationException("An unexpected error occurred while updating the entity", ex);
+            }
         }
     }
 }

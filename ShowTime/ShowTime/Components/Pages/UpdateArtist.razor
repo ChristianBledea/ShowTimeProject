@@ -1,0 +1,96 @@
+﻿@page "/UpdateArtist/{id:int}"  
+@using ShowTime.Businesslogic.Abstractions  
+@using ShowTime.Businesslogic.Dtos  
+@inject IArtistService ArtistService  
+@inject NavigationManager NavigationManager  
+
+@if (isLoading)  
+{  
+    <p>Loading...</p>  
+}  
+else if (artist is null)  
+{  
+    <div class="alert alert-danger">Artist not found.</div>  
+}  
+else  
+{  
+    <h3 class="mb-4">Update Artist</h3>  
+    <EditForm Model="new_artist" OnValidSubmit="UpdateNewArtist" FormName="UpdateArtistForm">  
+        <DataAnnotationsValidator />  
+        <ValidationSummary />  
+
+        <div class="mb-3">  
+            <label for="artistName" class="form-label">Name</label>
+            <InputText class="form-control" placeholder="@artist.Name" @bind-Value="new_artist.Name" />
+        </div>  
+        <div class="mb-3">  
+            <label for="artistImage" class="form-label">Image URL</label>
+            <InputText class="form-control" placeholder="@artist.ImageUrl" @bind-Value="new_artist.ImageUrl" />
+        </div>  
+        <div class="mb-3">  
+            <label for="artistGenre" class="form-label">Genre</label>
+            <InputText class="form-control" placeholder="@artist.Genre" @bind-Value="new_artist.Genre" />
+        </div>  
+        <button class="btn btn-primary" type="submit">  
+            <span class="bi bi-pencil-square align-middle me-2"></span>  
+            Update Artist  
+        </button>  
+    </EditForm>  
+
+    @if (successMessage != null)  
+    {  
+        <div class="alert alert-success mt-3">@successMessage</div>  
+    }  
+}  
+
+@code {
+    [Parameter]
+    public int? id { get; set; }
+
+    [SupplyParameterFromForm]
+    private UpdateArtistDto new_artist { get; set; } = new();
+
+    private ArtistGetDto? artist=new();
+    private string? successMessage;  
+    private bool isLoading = true;  
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (id.HasValue)
+        {
+            isLoading = true;
+            Console.WriteLine($"Loading artist with ID: {id.Value}");
+
+            artist = await ArtistService.getArtistbyIdAsync(id.Value);
+
+            isLoading = false;
+
+        }
+    }
+
+    private async Task UpdateNewArtist()
+    {
+        if (new_artist is not null && id.HasValue)
+        {
+            // The 'artist' object contains the user's form input
+            if(new_artist.Name == null)
+            {
+                new_artist.Name = artist.Name;
+
+            }
+            if(new_artist.ImageUrl == null)
+            {
+                new_artist.ImageUrl = artist.ImageUrl;
+            }
+            if (new_artist.Genre == null)
+            {
+                new_artist.Genre = artist.Genre;
+            }
+
+            Console.WriteLine($"Updating artist with: Name={new_artist.Name}, Genre={new_artist.Genre}"); // Debug
+
+            await ArtistService.UpdateArtistAsync(id.Value, new_artist);
+            NavigationManager.NavigateTo("/ArtistsPage");
+        }
+    }
+}

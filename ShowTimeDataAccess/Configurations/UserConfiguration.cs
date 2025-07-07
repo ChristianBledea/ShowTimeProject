@@ -14,10 +14,16 @@ namespace ShowTime.DataAccess.Configurations
         public void Configure(EntityTypeBuilder<User> builder)
         {
             builder.ToTable("Users");
-            builder.HasKey(x => x.Id);
-            builder.Property(x => x.Email).IsRequired();
-            builder.Property(x => x.Password).IsRequired();
-            
+            builder.HasKey(u => u.Id);
+            builder.Property(u => u.Email).IsRequired().HasMaxLength(255);
+            builder.Property(u => u.Password).IsRequired().HasMaxLength(511);
+
+            builder.HasIndex(u => u.Email).IsUnique();
+
+            builder.HasOne(u => u.Role)
+                .WithMany(r => r.Users)
+                .HasForeignKey(u => u.RoleId);
+
         }
     }
 }
