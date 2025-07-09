@@ -1,7 +1,13 @@
 ﻿@page "/festivals"
+@using ShowTime.BusinessLogic.Abstractions
+@using ShowTime.BusinessLogic.Dtos
+@using ShowTime.BusinessLogic.Services
 @using ShowTime.Businesslogic.Abstractions
 @using ShowTime.Businesslogic.Dtos
+@using ShowTime.Businesslogic.Services
+@using Microsoft.AspNetCore.Components.Authorization
 @inject IFestivalService FestivalService
+@inject ILineupService LineupService
 @inject NavigationManager Navigation
 @inject IJSRuntime JSRuntime
 @rendermode InteractiveServer
@@ -313,9 +319,16 @@
             {
                 <div class="festival-card">
                     <div class="festival-actions">
-                        <button class="action-btn edit-btn" @onclick="@(() => Navigation.NavigateTo($"/edit-festival/{festival.Id}"))">Edit</button>
-                        <button class="action-btn delete-btn" @onclick="@(() => DeleteFestival(festival.Id))">Delete</button>
-                    </div>
+                <AuthorizeView Roles="Admin">
+                    <button class="action-btn edit-btn" @onclick="@(() => Navigation.NavigateTo($"/edit-festival/{festival.Id}"))">Edit</button>
+                    <button class="action-btn delete-btn" @onclick="@(() => DeleteFestival(festival.Id))">Delete</button>
+                </AuthorizeView>
+                <AuthorizeView Roles="User">
+                    <button class="action-btn" style="background-color:#007bff;" @onclick="@(() => Navigation.NavigateTo($"/buy-ticket/{festival.Id}"))">
+                        Buy Ticket
+                    </button>
+                </AuthorizeView>
+            </div>
 
                     <div class="festival-image-container">
                         <img src="@festival.SplashArt" alt="@festival.Name" class="festival-image" />
@@ -349,30 +362,21 @@
                                 <svg class="info-icon" viewBox="0 0 24 24">
                                     <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z" />
                                 </svg>
-                                Featured Artists
+                                Festival Lineup
                             </div>
 
-                            @if (GetFestivalArtists(festival.Id) != null && GetFestivalArtists(festival.Id).Any())
+                            @if (_festivalLineups.ContainsKey(festival.Id) && _festivalLineups[festival.Id].Any())
                             {
                                 <div class="artists-grid">
-                                    @{
-                                        var festivalArtists = GetFestivalArtists(festival.Id);
-                                        var artistsToShow = festivalArtists.Take(3).ToList();
-                                        var remainingCount = festivalArtists.Count - 3;
-                                    }
-
-                                    @foreach (var artist in artistsToShow)
+                                    @foreach (var lineup in _festivalLineups[festival.Id])
                                     {
                                         <div class="artist-card">
-                                            <div class="artist-name">@artist.Name</div>
-                                            <div class="artist-genre">@artist.Genre</div>
-                                        </div>
-                                    }
-
-                                    @if (remainingCount > 0)
-                                    {
-                                        <div class="artist-card more-artists">
-                                            +@remainingCount more
+                                            <div class="artist-name">@lineup.ArtistName</div>
+                                            <div class="artist-genre">
+                                                @lineup.Stage
+                                                <br />
+                                                @lineup.StartTime.ToString("MMM dd - HH:mm")
+                                            </div>
                                         </div>
                                     }
                                 </div>
@@ -380,7 +384,7 @@
                             else
                             {
                                 <div class="no-artists">
-                                    🎤 No artists assigned yet
+                                    No lineup information available
                                 </div>
                             }
                         </div>
@@ -394,7 +398,7 @@
 
 @code {
     private IList<FestivalGetDto> festivals = new List<FestivalGetDto>();
-    private Dictionary<int, IList<ArtistGetDto>> festivalArtists = new Dictionary<int, IList<ArtistGetDto>>();
+    private Dictionary<int, IEnumerable<LineupGetDto>> _festivalLineups = new();
     private bool isLoading = true;
 
     protected override async Task OnInitializedAsync()
@@ -408,15 +412,11 @@
         {
             isLoading = true;
             festivals = await FestivalService.GetAllFestivalsAsync();
+            await LoadLineupsAsync(); // Add this line to load lineups
 
             if (festivals == null || festivals.Count == 0)
             {
                 Console.WriteLine("No festivals found.");
-            }
-            else
-            {
-                // Load artists for each festival
-                //await LoadFestivalArtists();
             }
         }
         catch (Exception ex)
@@ -429,34 +429,6 @@
             StateHasChanged();
         }
     }
-
-    // private async Task LoadFestivalArtists()
-    // {
-    //     try
-    //     {
-    //         foreach (var festival in festivals)
-    //         {
-    //             Assuming you have a method to get artists by festival ID
-    //             Replace this with your actual method name
-    //             var artists = await FestivalService.GetFestivalArtistsAsync(festival.Id);
-    //             if (artists != null)
-    //             {
-    //                 festivalArtists[festival.Id] = artists;
-    //             }
-    //         }
-    //     }
-    //     catch (Exception ex)
-    //     {
-    //         Console.WriteLine($"Error loading festival artists: {ex.Message}");
-    //     }
-    // }
-
-    private IList<ArtistGetDto> GetFestivalArtists(int festivalId)
-    {
-        festivalArtists.TryGetValue(festivalId, out var artists);
-        return artists ?? new List<ArtistGetDto>();
-    }
-
 
     private async Task DeleteFestival(int festivalId)
     {
@@ -474,4 +446,20 @@
         }
     }
 
+    private async Task LoadLineupsAsync()
+    {
+        _festivalLineups.Clear();
+        foreach (var festival in festivals)
+        {
+            try
+            {
+                var lineup = await LineupService.GetLineupAsync(festival.Id);
+                _festivalLineups[festival.Id] = lineup;
+            }
+            catch
+            {
+                _festivalLineups[festival.Id] = new List<LineupGetDto>();
+            }
+        }
+    }
 }

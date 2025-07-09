@@ -26,6 +26,13 @@ namespace ShowTime.DataAccess.Configurations
                 .HasMaxLength(24);
             builder.Property(b => b.Price)
                 .IsRequired();
+
+            // Add this for Ticket relationship
+            builder.Property(b => b.TicketId)
+                .IsRequired();
+            builder.HasOne(b => b.Ticket)
+                .WithOne(t => t.Booking)
+                .HasForeignKey<Booking>(b => b.TicketId);
         }
     }
 }

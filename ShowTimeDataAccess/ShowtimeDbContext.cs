@@ -26,6 +26,8 @@ namespace ShowTime.DataAccess
             new LineupConfiguration().Configure(modelBuilder.Entity<Lineup>());
             new UserConfiguration().Configure(modelBuilder.Entity<User>());
             new BookingConfiguration().Configure(modelBuilder.Entity<Booking>());
+            new RoleConfiguration().Configure(modelBuilder.Entity<Role>());
+            new TicketConfiguration().Configure(modelBuilder.Entity<Ticket>());
         }
     }
 }

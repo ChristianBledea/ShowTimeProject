@@ -10,6 +10,7 @@ using ShowTime.Client.Pages;
 using ShowTime.Components;
 using ShowTime.DataAccess;
 using ShowTime.DataAccess.Models;
+using ShowTime.DataAccess.Repositories;
 using ShowTime.DataAccess.Repositories.Abstractions;
 using ShowTime.DataAccess.Repositories.Implementations;
 
@@ -34,6 +35,10 @@ builder.Services.AddCascadingAuthenticationState();
 // Add Identity services for password hashing
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 
+builder.Services.AddTransient<ILineupRepository, LineupRepository>();
+builder.Services.AddTransient<ILineupService, LineupService>();
+builder.Services.AddTransient<IArtistRepository, ArtistRepository>();
+builder.Services.AddTransient<IFestivalRepository, FestivalRepository>();
 builder.Services.AddTransient<IRepository<Artist>, GenericRepository<Artist>>();
 builder.Services.AddTransient<IArtistService, ArtistService>();
 builder.Services.AddTransient<IRepository<Festival>, GenericRepository<Festival>>();

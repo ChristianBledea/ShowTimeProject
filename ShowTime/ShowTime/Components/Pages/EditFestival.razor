@@ -1,9 +1,13 @@
 ﻿@page "/edit-festival/{FestivalId:int}"
+@using ShowTime.BusinessLogic.Abstractions
+@using ShowTime.BusinessLogic.Dtos
 @using ShowTime.Businesslogic.Abstractions
 @using ShowTime.Businesslogic.Dtos
 @inject IFestivalService FestivalService
 @inject IArtistService? ArtistService
 @inject NavigationManager Navigation
+@inject ILineupService LineupService
+
 @rendermode InteractiveServer
 
 <style>
@@ -261,22 +265,7 @@
         }
     }
 
-    // private async Task LoadFestivalArtists()
-    // {
-    //     try
-    //     {
-    //         var festivalArtists = await FestivalService.GetFestivalArtistsAsync(FestivalId);
-    //         if (festivalArtists != null)
-    //         {
-    //             selectedArtists = festivalArtists.ToList();
-    //             StateHasChanged();
-    //         }
-    //     }
-    //     catch (Exception ex)
-    //     {
-    //         Console.WriteLine($"Error loading festival artists: {ex.Message}");
-    //     }
-    // }
+    
 
     private void FilterArtists(ChangeEventArgs e)
     {
@@ -327,17 +316,31 @@
     {
         try
         {
-            // Add the selected artist IDs to the festival DTO
-            //editFestival.ArtistIds = selectedArtists.Select(a => a.Id).ToList();
-
+            // Update festival details
             await FestivalService.UpdateFestivalAsync(FestivalId, editFestival);
+
+            // Add selected artists to lineup
+            foreach (var (artist, index) in selectedArtists.Select((a, i) => (a, i)))
+            {
+                var lineupEntry = new LineupCreateDto
+                {
+                    FestivalId = FestivalId,
+                    ArtistId = artist.Id,
+                    Stage = "Main Stage", // You can customize this per artist/stage
+                    StartTime = editFestival.StartDate.AddHours(12 + index) // Example: stagger start times
+                };
+
+                await LineupService.AddToLineupAsync(lineupEntry);
+            }
+
             Navigation.NavigateTo("/festivals");
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error updating festival: {ex.Message}");
+            Console.WriteLine($"Error updating festival or lineup: {ex.Message}");
             // Optionally display error to the user
         }
     }
+
 
 }
