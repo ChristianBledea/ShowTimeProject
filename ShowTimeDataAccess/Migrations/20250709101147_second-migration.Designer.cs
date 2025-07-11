@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ShowTime.DataAccess;
 
@@ -11,9 +12,11 @@ using ShowTime.DataAccess;
 namespace ShowTime.DataAccess.Migrations
 {
     [DbContext(typeof(ShowtimeDbContext))]
-    partial class ShowtimeDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250709101147_second-migration")]
+    partial class secondmigration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -186,13 +189,7 @@ namespace ShowTime.DataAccess.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("FestivalId")
-                        .HasColumnType("int");
-
                     b.Property<int>("Price")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Quantity")
                         .HasColumnType("int");
 
                     b.Property<string>("Type")
@@ -200,8 +197,6 @@ namespace ShowTime.DataAccess.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("FestivalId");
 
                     b.ToTable("Tickets", (string)null);
                 });
@@ -298,17 +293,6 @@ namespace ShowTime.DataAccess.Migrations
                     b.Navigation("Festival");
                 });
 
-            modelBuilder.Entity("ShowTime.DataAccess.Models.Ticket", b =>
-                {
-                    b.HasOne("ShowTime.DataAccess.Models.Festival", "Festival")
-                        .WithMany("Tickets")
-                        .HasForeignKey("FestivalId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("Festival");
-                });
-
             modelBuilder.Entity("ShowTime.DataAccess.Models.User", b =>
                 {
                     b.HasOne("ShowTime.DataAccess.Models.Role", "Role")
@@ -330,8 +314,6 @@ namespace ShowTime.DataAccess.Migrations
                     b.Navigation("Bookings");
 
                     b.Navigation("Lineups");
-
-                    b.Navigation("Tickets");
                 });
 
             modelBuilder.Entity("ShowTime.DataAccess.Models.Role", b =>

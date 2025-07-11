@@ -69,51 +69,63 @@
         display: flex;
         justify-content: space-between;
     }
+
+    .add-artist-btn {
+        margin-bottom: 1.5rem;
+    }
 </style>
 
-<h3>Artists</h3>
+<div class="container mt-4">
 
-@if (isLoading)
-{
-    <div class="d-flex align-items-center">
-        <div class="spinner-border text-primary me-2" role="status">
-            <span class="visually-hidden">Loading...</span>
+    <AuthorizeView Roles="Admin">
+        <div class="d-flex justify-content-end add-artist-btn">
+            <button class="btn btn-success" @onclick="@(() => NavigationManager.NavigateTo("/AddArtist"))">
+                <span class="bi bi-plus-circle me-1"></span> Add Artist
+            </button>
         </div>
-        <span>Loading artists...</span>
-    </div>
-}
-else if (artists.Count == 0)
-{
-    <p>No artists registered</p>
-}
-else
-{
-    <div class="artists-grid">
-        @foreach (var artist in artists)
-        {
-            <div class="artist-card">
-                <img src="@artist.ImageUrl" alt="@artist.Name" class="artist-image" />
-                <div class="artist-name">@artist.Name</div>
-                <div class="artist-genre">@artist.Genre</div>
-                <AuthorizeView Roles="Admin">
-                    <div class="artist-actions">
-                        <button type="button" class="btn btn-danger btn-sm" @onclick="() => DeleteArtist(artist.Id)">
-                            <span class="bi bi-trash me-1"></span> Delete
-                        </button>
-                        <button type="button" class="btn btn-secondary btn-sm" @onclick="() => UpdateArtist(artist.Id)">
-                            <span class="bi bi-pencil-square me-1"></span> Update
-                        </button>
-                    </div>
-                </AuthorizeView>
+    </AuthorizeView>
+
+    @if (isLoading)
+    {
+        <div class="d-flex align-items-center">
+            <div class="spinner-border text-primary me-2" role="status">
+                <span class="visually-hidden">Loading...</span>
             </div>
-        }
-    </div>
-}
+            <span>Loading artists...</span>
+        </div>
+    }
+    else if (artists.Count == 0)
+    {
+        <p>No artists registered</p>
+    }
+    else
+    {
+        <div class="artists-grid">
+            @foreach (var artist in artists)
+            {
+                <div class="artist-card">
+                    <img src="@artist.ImageUrl" alt="@artist.Name" class="artist-image" />
+                    <div class="artist-name">@artist.Name</div>
+                    <div class="artist-genre">@artist.Genre</div>
+                    <AuthorizeView Roles="Admin">
+                        <div class="artist-actions">
+                            <button type="button" class="btn btn-danger btn-sm" @onclick="() => DeleteArtist(artist.Id)">
+                                <span class="bi bi-trash me-1"></span> Delete
+                            </button>
+                            <button type="button" class="btn btn-secondary btn-sm" @onclick="() => UpdateArtist(artist.Id)">
+                                <span class="bi bi-pencil-square me-1"></span> Update
+                            </button>
+                        </div>
+                    </AuthorizeView>
+                </div>
+            }
+        </div>
+    }
+</div>
 
 @code {
     private IList<ArtistGetDto> artists = new List<ArtistGetDto>();
     private bool isLoading = true;
-    private bool isAdmin = false;
 
     protected override async Task OnInitializedAsync()
     {

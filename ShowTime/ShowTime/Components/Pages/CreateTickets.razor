@@ -1,0 +1,229 @@
+﻿@page "/create-ticket/{FestivalId:int}"
+
+@using ShowTime.Businesslogic.Abstractions
+@using ShowTime.Businesslogic.Dtos
+@inject ITicketService TicketService
+@inject NavigationManager Navigation
+@rendermode InteractiveServer
+
+<style>
+    .ticket-container {
+        max-width: 900px;
+        margin: 2rem auto;
+        padding: 2rem;
+        background: rgba(30, 27, 75, 0.85);
+        backdrop-filter: blur(15px);
+        border-radius: 16px;
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.35);
+        border: 1px solid rgba(139, 92, 246, 0.3);
+    }
+
+    .ticket-header {
+        text-align: center;
+        font-size: 2rem;
+        font-weight: bold;
+        color: #c4b5fd;
+        margin-bottom: 2rem;
+    }
+
+    .ticket-card {
+        background: rgba(15, 23, 42, 0.75);
+        border: 1px solid rgba(139, 92, 246, 0.3);
+        border-radius: 12px;
+        padding: 1.25rem;
+        margin-bottom: 1.5rem;
+        color: white;
+        box-shadow: 0 4px 12px rgba(139, 92, 246, 0.2);
+    }
+
+        .ticket-card h5 {
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .ticket-card .info-line {
+            display: flex;
+            justify-content: space-between;
+            margin: 0.25rem 0;
+            font-size: 0.95rem;
+        }
+
+        .ticket-card .btn {
+            margin-top: 0.75rem;
+        }
+
+    .btn-icon {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+    }
+
+    .alert {
+        margin-top: 1rem;
+    }
+
+    .add-ticket-button {
+        display: block;
+        width: 100%;
+        margin-top: 2rem;
+        font-weight: 600;
+        font-size: 1rem;
+        padding: 12px;
+        border-radius: 10px;
+        background: #10b981;
+        color: white;
+        border: none;
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        transition: all 0.3s ease;
+    }
+
+        .add-ticket-button:hover {
+            background: #059669;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+        }
+</style>
+
+<div class="ticket-container">
+    <div class="ticket-header">🎟 Tickets for Festival #@FestivalId</div>
+
+    @if (isLoading)
+    {
+        <p class="text-info text-center">Loading tickets...</p>
+    }
+    else if (tickets == null || !tickets.Any())
+    {
+        <div class="alert alert-warning text-center">No tickets found for this festival.</div>
+    }
+    else
+    {
+        @foreach (var ticket in tickets)
+        {
+            <div class="ticket-card">
+                <h5>@ticket.Type Ticket</h5>
+                <div class="info-line">
+                    <span>Price:</span>
+                    <span>€@ticket.Price.ToString("F2")</span>
+                </div>
+                <div class="info-line">
+                    <span>Quantity:</span>
+                    <span>@ticket.Quantity</span>
+                </div>
+
+                <div class="d-flex justify-content-end mt-3">
+                    <button class="btn btn-sm btn-primary me-2" @onclick="() => EditTicket(ticket.Id)">
+                        <i class="bi bi-pencil"></i> Edit
+                    </button>
+                    <button class="btn btn-sm btn-danger" @onclick="() => ConfirmDelete(ticket.Id)">
+                        <i class="bi bi-trash"></i> Delete
+                    </button>
+                </div>
+            </div>
+        }
+    }
+
+    <button class="add-ticket-button" @onclick="@(() => Navigation.NavigateTo($"/add-ticket?festivalId={FestivalId}"))">
+        ➕ Add Ticket
+    </button>
+
+    @if (!string.IsNullOrEmpty(alertMessage))
+    {
+        <div class="alert @alertClass">@alertMessage</div>
+    }
+
+    @if (showDeleteConfirmation)
+    {
+        <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Confirm Delete</h5>
+                        <button type="button" class="btn-close" aria-label="Close" @onclick="CancelDelete"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Are you sure you want to delete ticket ID <strong>@ticketToDeleteId</strong>?</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-secondary" @onclick="CancelDelete">Cancel</button>
+                        <button class="btn btn-danger" @onclick="DeleteTicketConfirmed">Delete</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public int FestivalId { get; set; }
+
+    private List<TicketGetDto> tickets = new();
+    private bool isLoading = true;
+    private string? alertMessage;
+    private string alertClass = "alert-success";
+
+    private bool showDeleteConfirmation = false;
+    private int ticketToDeleteId;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadTicketsAsync();
+    }
+
+    private async Task LoadTicketsAsync()
+    {
+        isLoading = true;
+        alertMessage = null;
+        try
+        {
+            var result = await TicketService.GetTicketsByFestivalIdAsync(FestivalId);
+            tickets = result.ToList();
+        }
+        catch (Exception ex)
+        {
+            alertMessage = $"Error loading tickets: {ex.Message}";
+            alertClass = "alert-danger";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private void EditTicket(int ticketId)
+    {
+        Navigation.NavigateTo($"/edit-ticket/{ticketId}");
+    }
+
+    private void ConfirmDelete(int ticketId)
+    {
+        ticketToDeleteId = ticketId;
+        showDeleteConfirmation = true;
+    }
+
+    private void CancelDelete()
+    {
+        showDeleteConfirmation = false;
+        ticketToDeleteId = 0;
+    }
+
+    private async Task DeleteTicketConfirmed()
+    {
+        try
+        {
+            await TicketService.DeleteTicketAsync(ticketToDeleteId);
+            alertMessage = $"Ticket ID {ticketToDeleteId} deleted successfully.";
+            alertClass = "alert-success";
+            await LoadTicketsAsync();
+        }
+        catch (Exception ex)
+        {
+            alertMessage = $"Error deleting ticket: {ex.Message}";
+            alertClass = "alert-danger";
+        }
+        finally
+        {
+            showDeleteConfirmation = false;
+            ticketToDeleteId = 0;
+        }
+    }
+}

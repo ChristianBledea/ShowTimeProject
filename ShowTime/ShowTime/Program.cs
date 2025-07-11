@@ -35,6 +35,11 @@ builder.Services.AddCascadingAuthenticationState();
 // Add Identity services for password hashing
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 
+
+builder.Services.AddTransient<ITicketService, TicketService>();
+builder.Services.AddTransient<ITicketRepository, TicketRepository>();
+builder.Services.AddTransient<IBookingRepository, BookingRepository>();
+builder.Services.AddTransient<IBookingService, BookingService>();
 builder.Services.AddTransient<ILineupRepository, LineupRepository>();
 builder.Services.AddTransient<ILineupService, LineupService>();
 builder.Services.AddTransient<IArtistRepository, ArtistRepository>();

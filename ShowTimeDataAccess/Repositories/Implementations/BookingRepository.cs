@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using ShowTime.DataAccess.Models;
 using ShowTime.DataAccess.Repositories.Abstractions;
+
 
 namespace ShowTime.DataAccess.Repositories.Implementations
 {
@@ -18,10 +14,7 @@ namespace ShowTime.DataAccess.Repositories.Implementations
             _context = context;
             _bookings = context.Set<Booking>();
         }
-        public async Task<Booking?> GetAsync(int userId, int festivalId)
-        {
-            return await _bookings.SingleOrDefaultAsync(b => b.UserId == userId && b.FestivalId == festivalId);
-        }
+       
         public async Task<IEnumerable<Booking>> GetByUserIdAsync(int userId)
         {
             return await _bookings
@@ -29,7 +22,7 @@ namespace ShowTime.DataAccess.Repositories.Implementations
                 .Where(b => b.UserId == userId)
                 .ToListAsync();
         }
-        public async Task AddAsync(Booking booking)
+        public async Task AddBookingAsync(Booking booking)
         {
             try
             {
@@ -63,7 +56,7 @@ namespace ShowTime.DataAccess.Repositories.Implementations
             }
         }
 
-        public async Task DeleteAsync(int userId, int festivalId)
+        public async Task DeleteBookingAsync(int userId, int festivalId)
         {
             try
             {
@@ -78,6 +71,17 @@ namespace ShowTime.DataAccess.Repositories.Implementations
             catch (Exception ex)
             {
                 throw new Exception($"Unable to delete booking: {ex.Message}");
+            }
+        }
+        public async Task<Booking?> GetBookingByUserIdAndFestivalIdAsync(int userId, int festivalId)
+        {
+            try
+            {
+                return await _bookings.SingleOrDefaultAsync(b => b.UserId == userId && b.FestivalId == festivalId);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Unable to retrieve booking for userId {userId} and festivalId {festivalId}: {ex.Message}");
             }
         }
     }

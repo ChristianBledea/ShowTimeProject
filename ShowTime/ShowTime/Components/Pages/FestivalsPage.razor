@@ -1,10 +1,8 @@
 ﻿@page "/festivals"
 @using ShowTime.BusinessLogic.Abstractions
 @using ShowTime.BusinessLogic.Dtos
-@using ShowTime.BusinessLogic.Services
 @using ShowTime.Businesslogic.Abstractions
 @using ShowTime.Businesslogic.Dtos
-@using ShowTime.Businesslogic.Services
 @using Microsoft.AspNetCore.Components.Authorization
 @inject IFestivalService FestivalService
 @inject ILineupService LineupService
@@ -14,7 +12,7 @@
 
 <style>
     body {
-        background-color: #26244d;
+        background-color: white;
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         margin: 0;
         padding: 0;
@@ -25,15 +23,6 @@
         margin: 0 auto;
         padding: 20px;
     }
-
-        .festivals-container h2 {
-            text-align: center;
-            color: #ffffff;
-            font-weight: bold;
-            margin-bottom: 2rem;
-            font-size: 2.5rem;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
-        }
 
     .add-festival-btn {
         background: linear-gradient(45deg, #28a745, #20c997);
@@ -115,22 +104,18 @@
         color: #ffffff;
     }
 
-    .festival-info {
-        margin-bottom: 1.5rem;
+    .festival-info p {
+        margin: 0.5rem 0;
+        font-size: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
     }
 
-        .festival-info p {
-            margin: 0.5rem 0;
-            font-size: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .festival-info strong {
-            color: #20c997;
-            min-width: 80px;
-        }
+    .festival-info strong {
+        color: #20c997;
+        min-width: 80px;
+    }
 
     .info-icon {
         width: 16px;
@@ -158,7 +143,6 @@
 
     .artists-grid {
         display: grid;
-        /* Reverting to a more flexible grid for artists */
         grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
         gap: 0.75rem;
     }
@@ -201,24 +185,6 @@
         border: 1px solid rgba(255,255,255,0.1);
     }
 
-    .more-artists {
-        background: rgba(32, 201, 151, 0.2);
-        border: 1px dashed #20c997;
-        color: #20c997;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 0.8rem;
-        font-weight: bold;
-        cursor: pointer;
-        transition: all 0.3s ease;
-    }
-
-        .more-artists:hover {
-            background: rgba(32, 201, 151, 0.3);
-            transform: translateY(-2px);
-        }
-
     .no-festivals {
         text-align: center;
         color: #b8b8b8;
@@ -237,29 +203,15 @@
         margin-top: 3rem;
     }
 
-    .date-range {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        flex-wrap: wrap;
-    }
-
-    .date-separator {
-        color: #20c997;
-        font-weight: bold;
-    }
-
     .festival-actions {
         position: absolute;
         top: 10px;
         right: 10px;
         display: flex;
         gap: 8px;
-        /* Ensure buttons are above content */
         z-index: 10;
     }
 
-    /* Redefining action buttons to remove Bootstrap conflict */
     .action-btn {
         border: none;
         color: white;
@@ -268,42 +220,43 @@
         cursor: pointer;
         font-size: 0.9rem;
         transition: all 0.3s ease;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.3); /* Add subtle shadow */
+        box-shadow: 0 2px 4px rgba(0,0,0,0.3);
     }
 
     .edit-btn {
-        background-color: #28a745; /* Green */
+        background: linear-gradient(135deg, #17c964, #11998e);
+        color: white;
+        font-weight: 600;
     }
 
         .edit-btn:hover {
-            background-color: #218838; /* Darker green on hover */
-            transform: translateY(-1px);
-            box-shadow: 0 3px 6px rgba(0,0,0,0.4);
+            background: linear-gradient(135deg, #11998e, #0c786d);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.3);
         }
 
     .delete-btn {
-        background-color: #dc3545; /* Red */
+        background-color: #dc3545;
     }
 
         .delete-btn:hover {
-            background-color: #c82333; /* Darker red on hover */
+            background-color: #c82333;
             transform: translateY(-1px);
             box-shadow: 0 3px 6px rgba(0,0,0,0.4);
         }
 </style>
 
 <div class="festivals-container">
-    <h2>🎵 Music Festivals</h2>
 
-    <button class="add-festival-btn" @onclick="@(() => Navigation.NavigateTo("/add-festival"))">
-        ➕ Add New Festival
-    </button>
+    <AuthorizeView Roles="Admin">
+        <button class="add-festival-btn" @onclick="@(() => Navigation.NavigateTo("/add-festival"))">
+            ➕ Add New Festival
+        </button>
+    </AuthorizeView>
 
     @if (isLoading)
     {
-        <div class="loading">
-            🎪 Loading festivals...
-        </div>
+        <div class="loading">🎪 Loading festivals...</div>
     }
     else if (festivals == null || festivals.Count == 0)
     {
@@ -319,16 +272,17 @@
             {
                 <div class="festival-card">
                     <div class="festival-actions">
-                <AuthorizeView Roles="Admin">
-                    <button class="action-btn edit-btn" @onclick="@(() => Navigation.NavigateTo($"/edit-festival/{festival.Id}"))">Edit</button>
-                    <button class="action-btn delete-btn" @onclick="@(() => DeleteFestival(festival.Id))">Delete</button>
-                </AuthorizeView>
-                <AuthorizeView Roles="User">
-                    <button class="action-btn" style="background-color:#007bff;" @onclick="@(() => Navigation.NavigateTo($"/buy-ticket/{festival.Id}"))">
-                        Buy Ticket
-                    </button>
-                </AuthorizeView>
-            </div>
+                        <AuthorizeView Roles="Admin">
+                            <button class="action-btn edit-btn" @onclick="@(() => Navigation.NavigateTo($"/edit-festival/{festival.Id}"))">✏️ Edit</button>
+                            <button class="action-btn" style="background-color:#6f42c1;" @onclick="@(() => Navigation.NavigateTo($"/create-ticket/{festival.Id}"))">🎟️ Ticket</button>
+                            <button class="action-btn delete-btn" @onclick="@(() => DeleteFestival(festival.Id))">🗑️ Delete</button>
+                        </AuthorizeView>
+                        <AuthorizeView Roles="User">
+                            <button class="action-btn" style="background-color:#007bff;" @onclick="@(() => Navigation.NavigateTo($"/buyticket/{festival.Id}"))">
+                                🎫 Buy Ticket
+                            </button>
+                        </AuthorizeView>
+                    </div>
 
                     <div class="festival-image-container">
                         <img src="@festival.SplashArt" alt="@festival.Name" class="festival-image" />
@@ -338,10 +292,7 @@
                     <div class="festival-details">
                         <div class="festival-info">
                             <p>
-                                <svg class="info-icon" viewBox="0 0 24 24">
-                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
-                                </svg>
-                                <strong>Dates:</strong>
+                                📅 <strong>Dates:</strong>
                                 <span class="date-range">
                                     @festival.StartDate.ToString("MMM dd, yyyy")
                                     <span class="date-separator">→</span>
@@ -350,20 +301,12 @@
                             </p>
 
                             <p>
-                                <svg class="info-icon" viewBox="0 0 24 24">
-                                    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
-                                </svg>
-                                <strong>Location:</strong> @festival.Location
+                                📍 <strong>Location:</strong> @festival.Location
                             </p>
                         </div>
 
                         <div class="artists-section">
-                            <div class="artists-title">
-                                <svg class="info-icon" viewBox="0 0 24 24">
-                                    <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z" />
-                                </svg>
-                                Festival Lineup
-                            </div>
+                            <div class="artists-title">🎤 Festival Lineup</div>
 
                             @if (_festivalLineups.ContainsKey(festival.Id) && _festivalLineups[festival.Id].Any())
                             {
@@ -372,20 +315,14 @@
                                     {
                                         <div class="artist-card">
                                             <div class="artist-name">@lineup.ArtistName</div>
-                                            <div class="artist-genre">
-                                                @lineup.Stage
-                                                <br />
-                                                @lineup.StartTime.ToString("MMM dd - HH:mm")
-                                            </div>
+                                            <div class="artist-genre">@lineup.Stage<br />@lineup.StartTime.ToString("MMM dd - HH:mm")</div>
                                         </div>
                                     }
                                 </div>
                             }
                             else
                             {
-                                <div class="no-artists">
-                                    No lineup information available
-                                </div>
+                                <div class="no-artists">No lineup information available</div>
                             }
                         </div>
                     </div>
@@ -394,7 +331,6 @@
         </div>
     }
 </div>
-
 
 @code {
     private IList<FestivalGetDto> festivals = new List<FestivalGetDto>();
@@ -412,12 +348,7 @@
         {
             isLoading = true;
             festivals = await FestivalService.GetAllFestivalsAsync();
-            await LoadLineupsAsync(); // Add this line to load lineups
-
-            if (festivals == null || festivals.Count == 0)
-            {
-                Console.WriteLine("No festivals found.");
-            }
+            await LoadLineupsAsync();
         }
         catch (Exception ex)
         {
@@ -437,7 +368,7 @@
             try
             {
                 await FestivalService.DeleteFestivalAsync(festivalId);
-                await LoadFestivals(); // Refresh the list
+                await LoadFestivals();
             }
             catch (Exception ex)
             {

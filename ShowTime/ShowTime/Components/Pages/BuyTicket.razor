@@ -1,6 +1,180 @@
-﻿@page "/buyticket"
-<h3>BuyTicket</h3>
+﻿@page "/buyticket/{FestivalId:int}"
+@using ShowTime.Businesslogic.Abstractions
+@using ShowTime.Businesslogic.Dtos
+@using Microsoft.AspNetCore.Components.Authorization
+@inject ITicketService TicketService
+@inject IBookingService BookingService
+@inject AuthenticationStateProvider AuthStateProvider
+@inject NavigationManager Navigation
+
+<style>
+    .buy-ticket-wrapper {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 2rem;
+    }
+
+    .buy-ticket-card {
+        background: linear-gradient(135deg, #3d3b6b, #4a4872);
+        border-radius: 20px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+        padding: 2.5rem 3rem;
+        color: #fff;
+        width: 100%;
+        max-width: 700px;
+    }
+
+        .buy-ticket-card h3 {
+            color: #20c997;
+            font-weight: bold;
+        }
+
+    .form-label {
+        color: #d1d1d1;
+        font-weight: 500;
+    }
+
+    .form-select {
+        background-color: #ffffff;
+        border-radius: 10px;
+        padding: 0.6rem;
+    }
+
+    .btn-success {
+        font-weight: 600;
+        font-size: 1.1rem;
+        padding: 0.65rem 1.4rem;
+        border-radius: 12px;
+    }
+
+    .alert {
+        font-size: 0.95rem;
+    }
+</style>
+
+<div class="buy-ticket-wrapper">
+    <div class="buy-ticket-card">
+        <h3 class="mb-4">🎟 Book a Ticket for Festival #@FestivalId</h3>
+
+        @if (isLoading)
+        {
+            <div class="d-flex align-items-center">
+                <div class="spinner-border text-light me-2" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <span>Loading available tickets...</span>
+            </div>
+        }
+        else if (tickets == null || !tickets.Any())
+        {
+            <div class="alert alert-warning mt-2">No tickets found for this festival.</div>
+        }
+        else
+        {
+            <EditForm Model="bookingModel" OnValidSubmit="HandleBooking" FormName="CreateBooking">
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+
+                <div class="mb-3">
+                    <label for="ticketSelect" class="form-label">Select Ticket Type</label>
+                    <InputSelect id="ticketSelect" class="form-select shadow-sm" @bind-Value="bookingModel.TicketId">
+                        <option value="0">-- Choose a Ticket --</option>
+                        @foreach (var ticket in tickets)
+                        {
+                            <option value="@ticket.Id">@ticket.Type - €@ticket.Price</option>
+                        }
+                    </InputSelect>
+                </div>
+
+                <div class="d-grid gap-2 mt-3">
+                    <button class="btn btn-success" type="submit">
+                        <i class="bi bi-cart-check me-1"></i> Book Ticket
+                    </button>
+                </div>
+
+                @if (!string.IsNullOrEmpty(message))
+                {
+                    <div class="alert @alertClass mt-4">@message</div>
+                }
+            </EditForm>
+        }
+    </div>
+</div>
 
 @code {
+    [Parameter] public int FestivalId { get; set; }
 
+    private List<TicketGetDto> tickets = new();
+    private BookingCreateDto bookingModel { get; set; } = new();
+    private bool isLoading = true;
+    private string message = string.Empty;
+    private string alertClass = "alert-info";
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            tickets = (await TicketService.GetTicketsByFestivalIdAsync(FestivalId)).ToList();
+        }
+        catch (Exception ex)
+        {
+            message = $"Failed to load tickets: {ex.Message}";
+            alertClass = "alert-danger";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task HandleBooking()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (!user.Identity?.IsAuthenticated ?? true)
+        {
+            message = "You must be logged in to book a ticket.";
+            alertClass = "alert-danger";
+            return;
+        }
+
+        var userIdClaim = user.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier);
+        if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out var userId))
+        {
+            message = "Unable to identify user.";
+            alertClass = "alert-danger";
+            return;
+        }
+
+        var selectedTicket = tickets.FirstOrDefault(t => t.Id == bookingModel.TicketId);
+        if (bookingModel.TicketId == 0 || selectedTicket == null)
+        {
+            message = "Invalid ticket selected.";
+            alertClass = "alert-warning";
+            return;
+        }
+
+        var booking = new BookingCreateDto
+        {
+            UserId = userId,
+            FestivalId = FestivalId,
+            TicketId = selectedTicket.Id,
+            Type = selectedTicket.Type,
+            Price = selectedTicket.Price
+        };
+
+        try
+        {
+            await BookingService.AddBookingAsync(booking);
+            message = "✅ Ticket successfully booked!";
+            alertClass = "alert-success";
+        }
+        catch (Exception ex)
+        {
+            message = $"❌ Failed to book ticket: {ex.Message}";
+            alertClass = "alert-danger";
+        }
+    }
 }

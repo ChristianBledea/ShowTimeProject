@@ -4,19 +4,16 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ShowTime.DataAccess.Models
+namespace ShowTime.Businesslogic.Dtos
 {
-    public class Ticket
+    public class TicketCreateDto
     {
         public int Id { get; set; }
-        public string Type { get; set; } = string.Empty;
         public int Price { get; set; }
-
-        public int FestivalId { get; set; }
+        public string Type { get; set; } = string.Empty;
 
         public int Quantity { get; set; }
 
-        public Festival Festival { get; set; }
-        public Booking Booking { get; set; }
+        public int FestivalId { get; set; }
     }
 }

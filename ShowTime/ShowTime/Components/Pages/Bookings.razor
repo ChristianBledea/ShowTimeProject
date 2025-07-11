@@ -1,6 +1,145 @@
 ﻿@page "/bookings"
-<h3>Bookings</h3>
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Components.Authorization
+@using ShowTime.Businesslogic.Abstractions
+@using ShowTime.Businesslogic.Dtos
+@inject IBookingService BookingService
+@inject IFestivalService FestivalService
+@inject AuthenticationStateProvider AuthStateProvider
+
+@rendermode InteractiveServer
+
+<style>
+    .bookings-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 2rem;
+        margin-top: 2rem;
+    }
+
+    .booking-card {
+        background: linear-gradient(135deg, #3d3b6b, #4a4872);
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+        transition: all 0.3s ease;
+        border: 1px solid rgba(255,255,255,0.1);
+        display: flex;
+        flex-direction: column;
+        padding: 1.5rem 1rem 1rem 1rem;
+        min-height: 300px;
+        color: #fff;
+    }
+
+        .booking-card:hover {
+            transform: translateY(-8px) scale(1.03);
+            box-shadow: 0 16px 32px rgba(0,0,0,0.4);
+            border-color: #20c997;
+        }
+
+    .booking-title {
+        font-weight: bold;
+        font-size: 1.3rem;
+        margin-bottom: 0.5rem;
+        text-align: center;
+    }
+
+    .booking-info {
+        font-size: 1rem;
+        margin: 0.25rem 0;
+        text-align: center;
+    }
+
+    .no-bookings {
+        color: #ccc;
+        font-size: 1.2rem;
+        text-align: center;
+        margin-top: 2rem;
+    }
+
+    .spinner-wrapper {
+        display: flex;
+        align-items: center;
+    }
+</style>
+
+<div class="container mt-4">
+    <h3 class="text-primary mb-3">🎫 My Bookings</h3>
+
+    @if (isLoading)
+    {
+        <div class="spinner-wrapper">
+            <div class="spinner-border text-primary me-2" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <span>Loading your bookings...</span>
+        </div>
+    }
+    else if (bookings == null || bookings.Count == 0)
+    {
+        <div class="no-bookings">You haven't booked any tickets yet.</div>
+    }
+    else
+    {
+        <div class="bookings-grid">
+            @foreach (var booking in bookings)
+            {
+                var festivalName = festivalNames.TryGetValue(booking.FestivalId, out var name) ? name : $"Festival #{booking.FestivalId}";
+                <div class="booking-card">
+                    <div class="booking-title">@festivalName</div>
+                    <div class="booking-info"><strong>Type:</strong> @booking.Type</div>
+                    <div class="booking-info"><strong>Price:</strong> €@booking.Price.ToString("F2")</div>
+                    <div class="booking-info"><strong>Ticket ID:</strong> @booking.TicketId</div>
+                </div>
+            }
+        </div>
+    }
+</div>
 
 @code {
+    private List<BookingGetDto> bookings = new();
+    private Dictionary<int, string> festivalNames = new();
+    private bool isLoading = true;
 
+    protected override async Task OnInitializedAsync()
+    {
+        isLoading = true;
+
+        try
+        {
+            var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+            var user = authState.User;
+
+            var userIdClaim = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (!string.IsNullOrWhiteSpace(userIdClaim) && int.TryParse(userIdClaim, out int userId))
+            {
+                bookings = (await BookingService.GetUserBookingsAsync(userId)).ToList();
+
+                var uniqueFestivalIds = bookings.Select(b => b.FestivalId).Distinct();
+
+                foreach (var festivalId in uniqueFestivalIds)
+                {
+                    try
+                    {
+                        var festival = await FestivalService.GetFestivalAsync(festivalId);
+                        if (festival != null)
+                        {
+                            festivalNames[festivalId] = festival.Name;
+                        }
+                    }
+                    catch
+                    {
+                        festivalNames[festivalId] = $"Festival #{festivalId}";
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"❌ Failed to load bookings: {ex.Message}");
+        }
+
+        isLoading = false;
+    }
 }

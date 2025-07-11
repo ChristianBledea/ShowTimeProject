@@ -1,23 +1,102 @@
 ﻿@inherits LayoutComponentBase
+@inject NavigationManager NavigationManager
+
+@code {
+    private string CurrentPath => NavigationManager.ToBaseRelativePath(NavigationManager.Uri).Trim('/').ToLower();
+    private bool HideNav => CurrentPath == "" || CurrentPath == "login" || CurrentPath == "signin";
+}
 
 <div class="page">
-    <div class="sidebar">
-        <NavMenu />
-    </div>
-
-    <main>
-        <div class="top-row px-4">
-            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
+    @if (!HideNav)
+    {
+        <div class="sidebar">
+            <NavMenu />
         </div>
+    }
 
-        <article class="content px-4">
+    <main class="@(HideNav ? "w-100" : "")">
+        <article class="content">
             @Body
         </article>
     </main>
 </div>
 
-<div id="blazor-error-ui">
-    An unhandled error has occurred.
-    <a href="" class="reload">Reload</a>
-    <a class="dismiss">🗙</a>
-</div>
+<style>
+    /* Full height and no spacing */
+    html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+    }
+
+    /* Main layout containers */
+    .page {
+        display: flex;
+        flex-direction: row;
+        height: 100vh;
+        margin: 0;
+        padding: 0;
+    }
+
+    /* Sidebar: fixed to the left, full viewport height */
+    .sidebar {
+        background-image: linear-gradient(180deg, rgb(5, 39, 103) 0%, #3a0647 70%);
+        width: 250px;
+        height: 100vh; /* full viewport height */
+        position: fixed; /* fixed so it stays on scroll */
+        top: 0;
+        left: 0;
+        overflow-y: auto; /* allow vertical scroll if content overflows */
+        z-index: 1000;
+    }
+
+    /* Main content with left margin so it doesn't go under sidebar */
+    main {
+        flex: 1;
+        margin-left: 250px; /* same as sidebar width */
+        display: flex;
+        flex-direction: column;
+        margin-top: 0;
+        padding: 0;
+        height: 100vh;
+        overflow-y: auto; /* scroll main content if needed */
+    }
+
+    /* Top bar with no spacing */
+    .top-row {
+        height: 3.5rem;
+        background-color: #f7f7f7;
+        border-bottom: 1px solid #d6d5d5;
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        padding: 0;
+        margin: 0;
+    }
+
+    /* Content area fills remaining space */
+    article.content {
+        flex: 1;
+        margin: 0;
+        padding: 1rem; /* add some padding inside content */
+        overflow-y: auto;
+    }
+
+    /* Remove padding overrides in media queries */
+    @@media (min-width: 641px) {
+        .top-row, article.content
+
+    {
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+    }
+
+    }
+
+    /* Optional: full width for main on pages without nav */
+    main.w-100 {
+        width: 100%;
+        height: 100vh;
+        margin-left: 0;
+    }
+</style>

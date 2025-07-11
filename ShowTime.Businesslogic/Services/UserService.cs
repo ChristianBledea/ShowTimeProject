@@ -69,7 +69,8 @@ namespace ShowTime.BusinessLogic.Services
             return new LoginResponseDto
             {
                 Email = user.Email,
-                Role = user.Role.Name
+                Role = user.Role.Name,
+                Id= user.Id
             };
         }
 

@@ -1,0 +1,226 @@
+﻿@page "/edit-ticket/{TicketId:int}"
+
+@using ShowTime.Businesslogic.Abstractions
+@using ShowTime.Businesslogic.Dtos
+@inject ITicketService TicketService
+@inject NavigationManager Navigation
+@rendermode InteractiveServer
+
+<style>
+    .edit-ticket-container {
+        max-width: 600px;
+        margin: 4rem auto;
+        background: rgba(30, 27, 75, 0.85);
+        backdrop-filter: blur(20px);
+        padding: 2.5rem;
+        border-radius: 18px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        border: 1px solid rgba(139, 92, 246, 0.2);
+    }
+
+        .edit-ticket-container h3 {
+            color: #c4b5fd;
+            font-weight: 700;
+            font-size: 1.8rem;
+            text-align: center;
+            margin-bottom: 2rem;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.6);
+        }
+
+    .form-label {
+        color: #c7d2fe;
+        font-weight: 600;
+    }
+
+    .form-control {
+        background: rgba(30, 27, 75, 0.7);
+        border: 1px solid rgba(139, 92, 246, 0.4);
+        border-radius: 10px;
+        padding: 12px 16px;
+        color: white;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #8b5cf6;
+            box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.3);
+            background: rgba(30, 27, 75, 0.85);
+        }
+
+    .btn-primary, .btn-secondary {
+        padding: 0.6rem 1.2rem;
+        font-weight: 600;
+        border-radius: 12px;
+        font-size: 1rem;
+        transition: all 0.2s ease;
+    }
+
+    .btn-primary {
+        background-color: #6366f1;
+        border: none;
+        box-shadow: 0 6px 20px rgba(99, 102, 241, 0.3);
+    }
+
+        .btn-primary:hover {
+            background-color: #4f46e5;
+        }
+
+    .btn-secondary {
+        background-color: #6b7280;
+        border: none;
+    }
+
+        .btn-secondary:hover {
+            background-color: #4b5563;
+        }
+
+    .alert {
+        border-radius: 10px;
+        padding: 1rem;
+        margin-top: 1rem;
+        text-align: center;
+    }
+
+    .alert-success {
+        background: rgba(34, 197, 94, 0.2);
+        border: 1px solid rgba(34, 197, 94, 0.5);
+        color: #22c55e;
+    }
+
+    .alert-danger {
+        background: rgba(239, 68, 68, 0.15);
+        border: 1px solid rgba(239, 68, 68, 0.5);
+        color: #ef4444;
+    }
+
+    .alert-warning {
+        background: rgba(234, 179, 8, 0.15);
+        border: 1px solid rgba(234, 179, 8, 0.5);
+        color: #eab308;
+    }
+</style>
+
+<div class="edit-ticket-container">
+    <h3>
+        ✏️ Edit Ticket #@TicketId
+    </h3>
+
+    @if (isLoading)
+    {
+        <p class="text-info text-center">Loading ticket...</p>
+    }
+    else if (loadError != null)
+    {
+        <div class="alert alert-danger">@loadError</div>
+    }
+    else if (editModel == null)
+    {
+        <div class="alert alert-warning">Ticket not found.</div>
+    }
+    else
+    {
+        <EditForm Model="editModel" OnValidSubmit="HandleValidSubmit" FormName="EditTicket">
+            <DataAnnotationsValidator />
+            <ValidationSummary class="text-danger mb-3" />
+
+            <div class="mb-3">
+                <label class="form-label">Type</label>
+                <InputText class="form-control" @bind-Value="editModel.Type" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Price (EUR)</label>
+                <InputNumber class="form-control" @bind-Value="editModel.Price" step="0.01" min="0" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Quantity</label>
+                <InputNumber class="form-control" @bind-Value="editModel.Quantity" min="0" />
+            </div>
+
+            <div class="d-flex gap-2 mt-4 justify-content-end">
+                <button type="submit" class="btn btn-primary" disabled="@isSaving">
+                    <i class="bi bi-save me-1"></i> Save
+                </button>
+                <button type="button" class="btn btn-secondary" @onclick="Cancel" disabled="@isSaving">
+                    <i class="bi bi-x-circle me-1"></i> Cancel
+                </button>
+            </div>
+
+            @if (!string.IsNullOrEmpty(alertMessage))
+            {
+                <div class="alert @alertClass mt-3">@alertMessage</div>
+            }
+        </EditForm>
+    }
+</div>
+
+@code {
+    [Parameter] public int TicketId { get; set; }
+
+    private TicketGetDto? editModel;
+    private bool isLoading = true;
+    private bool isSaving = false;
+    private string? loadError;
+    private string? alertMessage;
+    private string alertClass = "alert-success";
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            editModel = await TicketService.GetTicketByIdAsync(TicketId);
+            if (editModel == null)
+            {
+                loadError = "Ticket not found.";
+            }
+        }
+        catch (Exception ex)
+        {
+            loadError = $"Error loading ticket: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        isSaving = true;
+        alertMessage = null;
+
+        try
+        {
+            await TicketService.UpdateTicketAsync(editModel!);
+            alertMessage = "Ticket updated successfully.";
+            alertClass = "alert-success";
+
+            await Task.Delay(1000);
+            Navigation.NavigateTo($"/create-ticket/{editModel!.FestivalId}");
+        }
+        catch (Exception ex)
+        {
+            alertMessage = $"Error updating ticket: {ex.Message}";
+            alertClass = "alert-danger";
+        }
+        finally
+        {
+            isSaving = false;
+        }
+    }
+
+    private void Cancel()
+    {
+        if (editModel != null)
+        {
+            Navigation.NavigateTo($"/create-ticket/{editModel.FestivalId}");
+        }
+        else
+        {
+            Navigation.NavigateTo("/festivals");
+        }
+    }
+}

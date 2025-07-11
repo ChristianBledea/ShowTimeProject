@@ -9,10 +9,12 @@ namespace ShowTime.DataAccess.Repositories.Abstractions
 {
     public interface IBookingRepository
     {
-        Task<Booking?> GetAsync(int userId, int festivalId);
+        
         Task<IEnumerable<Booking>> GetByUserIdAsync(int userId);
-        Task AddAsync(Booking booking);
+
+        Task<Booking?> GetBookingByUserIdAndFestivalIdAsync(int userId, int festivalId);
+        Task AddBookingAsync(Booking booking);
         Task UpdateAsync(Booking booking);
-        Task DeleteAsync(int userId, int festivalId);
+        Task DeleteBookingAsync(int userId, int festivalId);
     }
 }

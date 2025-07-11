@@ -1,47 +1,131 @@
-﻿@page "/UpdateArtist/{id:int}"  
-@using ShowTime.Businesslogic.Abstractions  
-@using ShowTime.Businesslogic.Dtos  
-@inject IArtistService ArtistService  
-@inject NavigationManager NavigationManager  
+﻿@page "/UpdateArtist/{id:int}"
+@using ShowTime.Businesslogic.Abstractions
+@using ShowTime.Businesslogic.Dtos
+@inject IArtistService ArtistService
+@inject NavigationManager NavigationManager
 
-@if (isLoading)  
-{  
-    <p>Loading...</p>  
-}  
-else if (artist is null)  
-{  
-    <div class="alert alert-danger">Artist not found.</div>  
-}  
-else  
-{  
-    <h3 class="mb-4">Update Artist</h3>  
-    <EditForm Model="new_artist" OnValidSubmit="UpdateNewArtist" FormName="UpdateArtistForm">  
-        <DataAnnotationsValidator />  
-        <ValidationSummary />  
+<style>
+    .update-artist-container {
+        max-width: 600px;
+        margin: 3rem auto;
+        padding: 2rem;
+        background: rgba(30, 27, 75, 0.85);
+        backdrop-filter: blur(20px);
+        border-radius: 16px;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+        border: 1px solid rgba(139, 92, 246, 0.3);
+    }
 
-        <div class="mb-3">  
-            <label for="artistName" class="form-label">Name</label>
-            <InputText class="form-control" placeholder="@artist.Name" @bind-Value="new_artist.Name" />
-        </div>  
-        <div class="mb-3">  
-            <label for="artistImage" class="form-label">Image URL</label>
-            <InputText class="form-control" placeholder="@artist.ImageUrl" @bind-Value="new_artist.ImageUrl" />
-        </div>  
-        <div class="mb-3">  
-            <label for="artistGenre" class="form-label">Genre</label>
-            <InputText class="form-control" placeholder="@artist.Genre" @bind-Value="new_artist.Genre" />
-        </div>  
-        <button class="btn btn-primary" type="submit">  
-            <span class="bi bi-pencil-square align-middle me-2"></span>  
-            Update Artist  
-        </button>  
-    </EditForm>  
+    .form-label {
+        color: #c7d2fe;
+        font-weight: 600;
+        font-size: 1rem;
+        margin-bottom: 0.5rem;
+    }
 
-    @if (successMessage != null)  
-    {  
-        <div class="alert alert-success mt-3">@successMessage</div>  
-    }  
-}  
+    .form-control {
+        background: rgba(30, 27, 75, 0.7);
+        border: 1px solid rgba(139, 92, 246, 0.4);
+        border-radius: 8px;
+        padding: 12px 16px;
+        color: white;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #8b5cf6;
+            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2);
+            background: rgba(30, 27, 75, 0.9);
+        }
+
+        .form-control::placeholder {
+            color: rgba(199, 210, 254, 0.6);
+        }
+
+    .page-title {
+        text-align: center;
+        color: white;
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 2rem;
+        text-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+    }
+
+    .btn-submit {
+        background: #6366f1;
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 1rem;
+        box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+        transition: all 0.3s ease;
+    }
+
+        .btn-submit:hover {
+            background: #4f46e5;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4);
+        }
+
+    .alert-success {
+        background: rgba(16, 185, 129, 0.2);
+        color: #10b981;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-top: 1rem;
+        border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+</style>
+
+@if (isLoading)
+{
+    <div class="text-center text-info">🎵 Loading artist...</div>
+}
+else if (artist is null)
+{
+    <div class="alert alert-danger text-center">Artist not found.</div>
+}
+else
+{
+    <div class="update-artist-container">
+        <h2 class="page-title">🎧 Update Artist</h2>
+
+        <EditForm Model="new_artist" OnValidSubmit="UpdateNewArtist" FormName="UpdateArtistForm">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+
+            <div class="mb-4">
+                <label for="artistName" class="form-label">Name</label>
+                <InputText class="form-control" id="artistName" placeholder="@artist.Name" @bind-Value="new_artist.Name" />
+            </div>
+
+            <div class="mb-4">
+                <label for="artistImage" class="form-label">Image URL</label>
+                <InputText class="form-control" id="artistImage" placeholder="@artist.ImageUrl" @bind-Value="new_artist.ImageUrl" />
+            </div>
+
+            <div class="mb-4">
+                <label for="artistGenre" class="form-label">Genre</label>
+                <InputText class="form-control" id="artistGenre" placeholder="@artist.Genre" @bind-Value="new_artist.Genre" />
+            </div>
+
+            <button class="btn-submit" type="submit">
+                <i class="bi bi-pencil-square me-2"></i>Update Artist
+            </button>
+        </EditForm>
+
+        @if (successMessage != null)
+        {
+            <div class="alert-success mt-3">@successMessage</div>
+        }
+    </div>
+}
 
 @code {
     [Parameter]
@@ -50,21 +134,17 @@ else
     [SupplyParameterFromForm]
     private UpdateArtistDto new_artist { get; set; } = new();
 
-    private ArtistGetDto? artist=new();
-    private string? successMessage;  
-    private bool isLoading = true;  
+    private ArtistGetDto? artist = new();
+    private string? successMessage;
+    private bool isLoading = true;
 
     protected override async Task OnInitializedAsync()
     {
         if (id.HasValue)
         {
             isLoading = true;
-            Console.WriteLine($"Loading artist with ID: {id.Value}");
-
             artist = await ArtistService.getArtistbyIdAsync(id.Value);
-
             isLoading = false;
-
         }
     }
 
@@ -72,22 +152,9 @@ else
     {
         if (new_artist is not null && id.HasValue)
         {
-            // The 'artist' object contains the user's form input
-            if(new_artist.Name == null)
-            {
-                new_artist.Name = artist.Name;
-
-            }
-            if(new_artist.ImageUrl == null)
-            {
-                new_artist.ImageUrl = artist.ImageUrl;
-            }
-            if (new_artist.Genre == null)
-            {
-                new_artist.Genre = artist.Genre;
-            }
-
-            Console.WriteLine($"Updating artist with: Name={new_artist.Name}, Genre={new_artist.Genre}"); // Debug
+            new_artist.Name ??= artist?.Name;
+            new_artist.ImageUrl ??= artist?.ImageUrl;
+            new_artist.Genre ??= artist?.Genre;
 
             await ArtistService.UpdateArtistAsync(id.Value, new_artist);
             NavigationManager.NavigateTo("/ArtistsPage");

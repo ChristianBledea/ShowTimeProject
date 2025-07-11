@@ -12,82 +12,316 @@
 
 <style>
     body {
-        background-color: #26244d;
+        background: linear-gradient(135deg, #1e1b4b 0%, #3730a3 50%, #4f46e5 100%);
+        min-height: 100vh;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        margin: 0;
+        padding: 0;
     }
 
     .edit-festival-container {
-        max-width: 800px;
-        margin: 0 auto;
-        padding: 20px;
-        color: white;
+        max-width: 900px;
+        margin: 2rem auto;
+        padding: 2rem;
+        background: rgba(30, 27, 75, 0.85);
+        backdrop-filter: blur(20px);
+        border-radius: 16px;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+        border: 1px solid rgba(139, 92, 246, 0.3);
     }
 
-        .edit-festival-container h3 {
-            text-align: center;
-            color: white;
-            font-weight: bold;
-            margin-bottom: 1.5rem;
+    .page-title {
+        text-align: center;
+        color: white;
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 2rem;
+        text-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+
+        .page-title::before {
+            content: '🎵';
+            font-size: 2rem;
         }
 
-    .form-group {
-        margin-bottom: 1rem;
+    .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+        margin-bottom: 2rem;
     }
 
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
         .form-group label {
-            color: white;
-            font-weight: bold;
+            color: #c7d2fe;
+            font-weight: 600;
             display: block;
             margin-bottom: 0.5rem;
+            font-size: 1rem;
+        }
+
+    .form-control {
+        background: rgba(30, 27, 75, 0.7);
+        border: 1px solid rgba(139, 92, 246, 0.4);
+        border-radius: 8px;
+        padding: 12px 16px;
+        color: white;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #8b5cf6;
+            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2);
+            background: rgba(30, 27, 75, 0.9);
+        }
+
+        .form-control::placeholder {
+            color: rgba(199, 210, 254, 0.6);
         }
 
     .artists-section {
-        background-color: #3d3b6b;
-        padding: 20px;
+        background: rgba(30, 27, 75, 0.6);
+        padding: 2rem;
+        border-radius: 12px;
+        margin: 2rem 0;
+        border: 1px solid rgba(139, 92, 246, 0.3);
+    }
+
+        .artists-section h4 {
+            color: #10b981;
+            margin-bottom: 1.5rem;
+            font-size: 1.25rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+            .artists-section h4::before {
+                content: '🎵';
+                font-size: 1.2rem;
+            }
+
+    .artist-list {
+        max-height: 400px;
+        overflow-y: auto;
+        background: rgba(15, 23, 42, 0.5);
         border-radius: 8px;
-        margin: 20px 0;
+        padding: 1rem;
+        border: 1px solid rgba(139, 92, 246, 0.2);
     }
 
     .artist-item {
-        background-color: #4a4872;
-        padding: 10px;
-        margin: 5px 0;
-        border-radius: 5px;
+        background: rgba(30, 27, 75, 0.6);
+        padding: 12px 16px;
+        margin: 8px 0;
+        border-radius: 8px;
         display: flex;
         align-items: center;
+        transition: all 0.3s ease;
+        border: 1px solid rgba(139, 92, 246, 0.2);
     }
 
+        .artist-item:hover {
+            background: rgba(55, 48, 163, 0.4);
+            border-color: rgba(139, 92, 246, 0.4);
+            transform: translateY(-1px);
+        }
+
     .artist-checkbox {
-        margin-right: 10px;
+        margin-right: 12px;
+        width: 18px;
+        height: 18px;
+        accent-color: #10b981;
+    }
+
+    .artist-info {
+        color: white;
+        font-weight: 500;
+    }
+
+    .artist-genre {
+        color: rgba(199, 210, 254, 0.7);
+        font-size: 0.9rem;
+        margin-left: 8px;
     }
 
     .selected-artists {
-        background-color: #2a5d31;
-        padding: 15px;
-        border-radius: 8px;
-        margin-top: 15px;
+        background: rgba(15, 23, 42, 0.6);
+        padding: 1.5rem;
+        border-radius: 12px;
+        margin-top: 1.5rem;
+        border: 1px solid rgba(16, 185, 129, 0.3);
     }
 
+        .selected-artists h5 {
+            color: #10b981;
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+            .selected-artists h5::before {
+                content: '🌟';
+                font-size: 1rem;
+            }
+
     .selected-artist-tag {
-        background-color: #28a745;
+        background: #10b981;
         color: white;
-        padding: 5px 10px;
-        border-radius: 15px;
-        margin: 3px;
+        padding: 6px 12px;
+        border-radius: 20px;
+        margin: 4px;
         display: inline-block;
-        font-size: 0.9rem;
+        font-size: 0.85rem;
+        font-weight: 500;
+        box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+        transition: all 0.3s ease;
     }
+
+        .selected-artist-tag:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+        }
 
     .remove-artist {
         margin-left: 8px;
         cursor: pointer;
         font-weight: bold;
+        padding: 2px 6px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.2);
+        transition: all 0.3s ease;
     }
+
+        .remove-artist:hover {
+            background: rgba(239, 68, 68, 0.8);
+            transform: scale(1.1);
+        }
+
+    .btn {
+        padding: 12px 24px;
+        border: none;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-right: 1rem;
+    }
+
+    .btn-primary {
+        background: #10b981;
+        color: white;
+        box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+    }
+
+        .btn-primary:hover {
+            background: #059669;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
+        }
+
+        .btn-primary:disabled {
+            background: rgba(16, 185, 129, 0.5);
+            cursor: not-allowed;
+            transform: none;
+        }
+
+    .btn-secondary {
+        background: rgba(75, 85, 99, 0.8);
+        color: white;
+        border: 1px solid rgba(139, 92, 246, 0.3);
+    }
+
+        .btn-secondary:hover {
+            background: rgba(107, 114, 128, 0.8);
+            transform: translateY(-2px);
+        }
 
     .loading {
         text-align: center;
-        color: #20c997;
-        font-size: 1.2rem;
+        color: #10b981;
+        font-size: 1.5rem;
         margin-top: 3rem;
+        font-weight: 600;
+    }
+
+    .error-message {
+        background: rgba(239, 68, 68, 0.2);
+        color: #f87171;
+        padding: 1rem;
+        border-radius: 8px;
+        margin: 1rem 0;
+        border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    .success-message {
+        background: rgba(16, 185, 129, 0.2);
+        color: #10b981;
+        padding: 1rem;
+        border-radius: 8px;
+        margin: 1rem 0;
+        border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .button-group {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+
+    /* Scrollbar styling */
+    .artist-list::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    .artist-list::-webkit-scrollbar-track {
+        background: rgba(30, 27, 75, 0.3);
+        border-radius: 4px;
+    }
+
+    .artist-list::-webkit-scrollbar-thumb {
+        background: rgba(139, 92, 246, 0.5);
+        border-radius: 4px;
+    }
+
+        .artist-list::-webkit-scrollbar-thumb:hover {
+            background: rgba(139, 92, 246, 0.7);
+        }
+
+    @@media (max-width: 768px) {
+        .form-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .edit-festival-container {
+            margin: 1rem;
+            padding: 1rem;
+        }
+
+        .page-title {
+            font-size: 2rem;
+        }
     }
 </style>
 
@@ -100,49 +334,64 @@
     }
     else if (editFestival == null)
     {
-        <h3>Festival not found</h3>
-        <button class="btn btn-secondary" @onclick="@(() => Navigation.NavigateTo("/festivals"))">Back to Festivals</button>
+        <h3 class="page-title">Festival not found</h3>
+        <div class="button-group">
+            <button class="btn btn-secondary" @onclick="@(() => Navigation.NavigateTo("/festivals"))">Back to Festivals</button>
+        </div>
     }
     else
     {
-        <h3>Edit Festival</h3>
+        <h3 class="page-title">Edit Festival</h3>
+
+        @if (!string.IsNullOrEmpty(errorMessage))
+        {
+            <div class="error-message">@errorMessage</div>
+        }
+
+        @if (!string.IsNullOrEmpty(successMessage))
+        {
+            <div class="success-message">@successMessage</div>
+        }
+
         <EditForm Model="editFestival" OnValidSubmit="HandleEditFestival" FormName="EditFestivalForm">
             <DataAnnotationsValidator />
             <ValidationSummary />
 
-            <div class="form-group">
-                <label for="name">Name</label>
-                <InputText id="name" class="form-control" @bind-Value="editFestival.Name" />
-                <ValidationMessage For="@(() => editFestival.Name)" />
-            </div>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="name">Festival Name</label>
+                    <InputText id="name" class="form-control" @bind-Value="editFestival.Name" placeholder="Enter festival name" />
+                    <ValidationMessage For="@(() => editFestival.Name)" />
+                </div>
 
-            <div class="form-group">
-                <label for="location">Location</label>
-                <InputText id="location" class="form-control" @bind-Value="editFestival.Location" />
-                <ValidationMessage For="@(() => editFestival.Location)" />
-            </div>
+                <div class="form-group">
+                    <label for="location">Location</label>
+                    <InputText id="location" class="form-control" @bind-Value="editFestival.Location" placeholder="Enter location" />
+                    <ValidationMessage For="@(() => editFestival.Location)" />
+                </div>
 
-            <div class="form-group">
-                <label for="startDate">Start Date</label>
-                <InputDate id="startDate" class="form-control" @bind-Value="editFestival.StartDate" />
-                <ValidationMessage For="@(() => editFestival.StartDate)" />
-            </div>
+                <div class="form-group">
+                    <label for="startDate">Start Date</label>
+                    <InputDate id="startDate" class="form-control" @bind-Value="editFestival.StartDate" />
+                    <ValidationMessage For="@(() => editFestival.StartDate)" />
+                </div>
 
-            <div class="form-group">
-                <label for="endDate">End Date</label>
-                <InputDate id="endDate" class="form-control" @bind-Value="editFestival.EndDate" />
-                <ValidationMessage For="@(() => editFestival.EndDate)" />
-            </div>
+                <div class="form-group">
+                    <label for="endDate">End Date</label>
+                    <InputDate id="endDate" class="form-control" @bind-Value="editFestival.EndDate" />
+                    <ValidationMessage For="@(() => editFestival.EndDate)" />
+                </div>
 
-            <div class="form-group">
-                <label for="splashArt">Splash Art URL</label>
-                <InputText id="splashArt" class="form-control" @bind-Value="editFestival.SplashArt" />
-                <ValidationMessage For="@(() => editFestival.SplashArt)" />
+                <div class="form-group full-width">
+                    <label for="splashArt">Splash Art URL</label>
+                    <InputText id="splashArt" class="form-control" @bind-Value="editFestival.SplashArt" placeholder="Enter image URL" />
+                    <ValidationMessage For="@(() => editFestival.SplashArt)" />
+                </div>
             </div>
 
             <!-- Artists Selection Section -->
             <div class="artists-section">
-                <h4>Select Artists</h4>
+                <h4>🎵 Manage Festival Lineup</h4>
 
                 @if (availableArtists != null && availableArtists.Any())
                 {
@@ -151,31 +400,34 @@
                         <InputText id="artistSearch" class="form-control" @bind-Value="artistSearchTerm" @oninput="FilterArtists" placeholder="Type to search artists..." />
                     </div>
 
-                    <div style="max-height: 300px; overflow-y: auto;">
+                    <div class="artist-list">
                         @foreach (var artist in filteredArtists)
                         {
                             <div class="artist-item">
                                 <input type="checkbox" class="artist-checkbox"
                                        checked="@IsArtistSelected(artist.Id)"
                                        @onchange="@((e) => ToggleArtistSelection(artist, e.Value as bool? ?? false))" />
-                                <span>@artist.Name (@artist.Genre)</span>
+                                <div class="artist-info">
+                                    <span>@artist.Name</span>
+                                    <span class="artist-genre">(@artist.Genre)</span>
+                                </div>
                             </div>
                         }
                     </div>
                 }
                 else if (isLoadingArtists)
                 {
-                    <p>Loading artists...</p>
+                    <p style="color: white;">Loading artists...</p>
                 }
                 else
                 {
-                    <p>No artists available. <a href="/add-artist" style="color: #28a745;">Add some artists first</a></p>
+                    <p style="color: white;">No artists available. <a href="/add-artist" style="color: #4ecdc4;">Add some artists first</a></p>
                 }
 
                 @if (selectedArtists.Any())
                 {
                     <div class="selected-artists">
-                        <h5>Selected Artists (@selectedArtists.Count):</h5>
+                        <h5>🌟 Selected Artists (@selectedArtists.Count):</h5>
                         @foreach (var artist in selectedArtists)
                         {
                             <span class="selected-artist-tag">
@@ -187,8 +439,19 @@
                 }
             </div>
 
-            <button type="submit" class="btn btn-primary">Update Festival</button>
-            <button type="button" class="btn btn-secondary ml-2" @onclick="@(() => Navigation.NavigateTo("/festivals"))">Cancel</button>
+            <div class="button-group">
+                <button type="submit" class="btn btn-primary" disabled="@isSubmitting">
+                    @if (isSubmitting)
+                    {
+                        <span>Updating...</span>
+                    }
+                    else
+                    {
+                        <span>Update Festival</span>
+                    }
+                </button>
+                <button type="button" class="btn btn-secondary" @onclick="@(() => Navigation.NavigateTo("/festivals"))">Cancel</button>
+            </div>
         </EditForm>
     }
 </div>
@@ -202,15 +465,19 @@
     private IList<ArtistGetDto> availableArtists = new List<ArtistGetDto>();
     private IList<ArtistGetDto> filteredArtists = new List<ArtistGetDto>();
     private List<ArtistGetDto> selectedArtists = new List<ArtistGetDto>();
+    private List<ArtistGetDto> originalSelectedArtists = new List<ArtistGetDto>();
     private string artistSearchTerm = "";
     private bool isLoadingArtists = true;
     private bool isLoading = true;
+    private bool isSubmitting = false;
+    private string errorMessage = "";
+    private string successMessage = "";
 
     protected override async Task OnInitializedAsync()
     {
         await LoadFestival();
         await LoadArtists();
-        //await LoadFestivalArtists();
+        await LoadFestivalLineup();
     }
 
     private async Task LoadFestival()
@@ -228,7 +495,7 @@
                     Location = festival.Location,
                     StartDate = festival.StartDate,
                     EndDate = festival.EndDate,
-					Capacity = festival.Capacity,
+                    Capacity = festival.Capacity,
                     SplashArt = festival.SplashArt
                 };
             }
@@ -236,6 +503,7 @@
         catch (Exception ex)
         {
             Console.WriteLine($"Error loading festival: {ex.Message}");
+            errorMessage = "Failed to load festival details.";
         }
         finally
         {
@@ -254,18 +522,44 @@
                 availableArtists = await ArtistService.getAllArtistsAsync();
                 filteredArtists = availableArtists.ToList();
             }
-            isLoadingArtists = false;
-            StateHasChanged();
         }
         catch (Exception ex)
         {
             Console.WriteLine($"Error loading artists: {ex.Message}");
+            errorMessage = "Failed to load artists.";
+        }
+        finally
+        {
             isLoadingArtists = false;
             StateHasChanged();
         }
     }
 
-    
+    private async Task LoadFestivalLineup()
+    {
+        try
+        {
+            var lineup = await LineupService.GetLineupAsync(FestivalId);
+            var lineupArtistNames = lineup.Select(l => l.ArtistName).ToList();
+
+            // Find artists that are currently in the lineup
+            selectedArtists = availableArtists
+                .Where(a => lineupArtistNames.Contains(a.Name))
+                .ToList();
+
+            // Keep a copy of the original selection to track changes
+            originalSelectedArtists = selectedArtists.ToList();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading festival lineup: {ex.Message}");
+            errorMessage = "Failed to load current lineup.";
+        }
+        finally
+        {
+            StateHasChanged();
+        }
+    }
 
     private void FilterArtists(ChangeEventArgs e)
     {
@@ -316,31 +610,69 @@
     {
         try
         {
+            isSubmitting = true;
+            errorMessage = "";
+            successMessage = "";
+
             // Update festival details
             await FestivalService.UpdateFestivalAsync(FestivalId, editFestival);
 
-            // Add selected artists to lineup
-            foreach (var (artist, index) in selectedArtists.Select((a, i) => (a, i)))
+            // Handle lineup changes
+            await UpdateLineup();
+
+            successMessage = "Festival updated successfully!";
+            await Task.Delay(1500); // Show success message briefly
+            Navigation.NavigateTo("/festivals");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error updating festival: {ex.Message}");
+            errorMessage = "Failed to update festival. Please try again.";
+        }
+        finally
+        {
+            isSubmitting = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task UpdateLineup()
+    {
+        try
+        {
+            // Find artists to remove (were selected originally but not now)
+            var artistsToRemove = originalSelectedArtists
+                .Where(original => !selectedArtists.Any(current => current.Id == original.Id))
+                .ToList();
+
+            // Find artists to add (selected now but weren't originally)
+            var artistsToAdd = selectedArtists
+                .Where(current => !originalSelectedArtists.Any(original => original.Id == current.Id))
+                .ToList();
+
+            // Remove artists from lineup
+            foreach (var artist in artistsToRemove)
+            {
+                await LineupService.RemoveFromLineupAsync(FestivalId, artist.Id);
+            }
+
+            // Add new artists to lineup
+            foreach (var (artist, index) in artistsToAdd.Select((a, i) => (a, i)))
             {
                 var lineupEntry = new LineupCreateDto
                 {
                     FestivalId = FestivalId,
                     ArtistId = artist.Id,
-                    Stage = "Main Stage", // You can customize this per artist/stage
-                    StartTime = editFestival.StartDate.AddHours(12 + index) // Example: stagger start times
+                    Stage = "Main Stage", // You can customize this
+                    StartTime = editFestival.StartDate.AddHours(12 + index) // Stagger start times
                 };
 
                 await LineupService.AddToLineupAsync(lineupEntry);
             }
-
-            Navigation.NavigateTo("/festivals");
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error updating festival or lineup: {ex.Message}");
-            // Optionally display error to the user
+            throw new Exception($"Error updating lineup: {ex.Message}");
         }
     }
-
-
 }

@@ -154,9 +154,11 @@
                 errorMessage = "Invalid credentials or user not found.";
                 return;
             }
+			Console.WriteLine(response.Id.ToString());
 
             var claims = new List<Claim>
             {
+				new(ClaimTypes.NameIdentifier, response.Id.ToString()),
                 new(ClaimTypes.Name, response.Email),
                 new(ClaimTypes.Role, response.Role),
             };
@@ -166,7 +168,7 @@
 
             await httpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, claimsPrincipal);
 
-            httpContext.Response.Redirect("/"); // Perform HTTP redirect to home page
+            httpContext.Response.Redirect("/ArtistsPage"); // Perform HTTP redirect to home page
         }
         catch (Exception ex)
         {

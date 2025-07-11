@@ -1,11 +1,114 @@
-﻿@page "/"  
-@using ShowTime.DataAccess.Models;  
-@using ShowTime.Businesslogic.Services;  
-@using ShowTime.Components.Pages  
+﻿@page "/"
+@using Microsoft.AspNetCore.Components
 
-<PageTitle>Home</PageTitle>  
+<LayoutView>
+    <div class="home-page d-flex align-items-center justify-content-center position-relative">
+        <div class="aurora-bg"></div>
+        <div class="fireworks">
+            <div class="explosion" style="top: 30%; left: 25%; animation-delay: 0s;"></div>
+            <div class="explosion" style="top: 40%; left: 60%; animation-delay: 1s;"></div>
+            <div class="explosion" style="top: 50%; left: 40%; animation-delay: 2s;"></div>
+        </div>
 
-<h1>Hello, world!</h1>  
+        <div class="text-center z-1 position-relative">
+            <h1 class="display-4 fw-bold text-white mb-4">🎭 Welcome to ShowTime</h1>
+            <p class="lead text-white mb-5">Your gateway to unforgettable festivals.</p>
+            <a href="/login" class="btn btn-lg btn-outline-light px-5 py-3">
+                Login
+                <i class="bi bi-box-arrow-in-right ms-2"></i>
+            </a>
+        </div>
+    </div>
+</LayoutView>
 
+<style>
+    .home-page {
+        min-height: 100vh;
+        overflow: hidden;
+        position: relative;
+        background: #000;
+    }
 
-Welcome to your new app.
+    /* Aurora Background Gradient */
+    .aurora-bg {
+        position: absolute;
+        width: 200%;
+        height: 200%;
+        background: linear-gradient(60deg, #1b0036, #24005a, #006666, #003366, #1b0036);
+        background-size: 400% 400%;
+        animation: aurora 30s ease-in-out infinite;
+        z-index: 0;
+        filter: blur(40px);
+        opacity: 0.7;
+    }
+
+    keyframes aurora {
+        0%
+
+    {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
+
+    }
+
+    /* Firework Explosions */
+    .fireworks {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        z-index: 1;
+        pointer-events: none;
+    }
+
+    .explosion {
+        position: absolute;
+        width: 12px;
+        height: 12px;
+        background-color: white;
+        border-radius: 50%;
+        opacity: 0;
+        box-shadow: 0 0 10px red, 10px 0 10px yellow, -10px 0 10px blue, 0 10px 10px green, 0 -10px 10px purple;
+        animation: explode 3s ease-out infinite;
+    }
+
+    keyframes explode {
+        0%
+
+    {
+        transform: scale(0.5);
+        opacity: 0;
+    }
+
+    30% {
+        transform: scale(2);
+        opacity: 1;
+    }
+
+    100% {
+        transform: scale(3);
+        opacity: 0;
+    }
+
+    }
+
+    /* Text & Button Styling */
+    .btn-outline-light:hover {
+        color: #6f42c1;
+        background-color: #ffffff;
+        border-color: #ffffff;
+    }
+
+    h1, p {
+        text-shadow: 1px 1px 6px rgba(0, 0, 0, 0.6);
+    }
+</style>

@@ -17,6 +17,7 @@ namespace ShowTime.DataAccess.Models
         public string SplashArt { get; set; } = string.Empty;
         public ICollection<Lineup> Lineups { get; set; } = new List<Lineup>();
         public ICollection<Artist> Artists { get; set; } = new List<Artist>();
+        public ICollection<Ticket> Tickets { get; set; } = new List<Ticket>();
 
         public ICollection<Booking> Bookings { get; set; } = new List<Booking>();
         public ICollection<User> Users { get; set; } = new List<User>();

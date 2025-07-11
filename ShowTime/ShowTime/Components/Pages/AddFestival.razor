@@ -3,58 +3,134 @@
 @using ShowTime.Businesslogic.Dtos
 @inject IFestivalService FestivalService
 
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card shadow rounded">
-                <div class="card-body p-4">
-                    <h3 class="card-title mb-4 text-primary">Add New Festival</h3>
+<style>
+    .festival-form-container {
+        max-width: 700px;
+        margin: 4rem auto;
+        background: rgba(30, 27, 75, 0.85);
+        backdrop-filter: blur(24px);
+        padding: 2.5rem;
+        border-radius: 18px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        border: 1px solid rgba(139, 92, 246, 0.2);
+    }
 
-                    <EditForm EditContext="@editContext" OnValidSubmit="AddNewFestival" FormName="AddNewfestival">
-                        <DataAnnotationsValidator />
-                        <ValidationSummary class="text-danger mb-3" />
+        .festival-form-container h3 {
+            color: white;
+            font-weight: 700;
+            font-size: 2rem;
+            margin-bottom: 2rem;
+            text-align: center;
+            text-shadow: 0 3px 10px rgba(0, 0, 0, 0.6);
+        }
 
-                        <div class="mb-3">
-                            <label for="festivalName" class="form-label fw-semibold">Name</label>
-                            <InputText id="festivalName" class="@GetInputClass(nameof(newFestival.Name))" @bind-Value="newFestival.Name" />
-                            <ValidationMessage For="@(() => newFestival.Name)" class="text-danger small" />
-                        </div>
+    .form-label {
+        color: #c7d2fe;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
 
-                        <div class="mb-3">
-                            <label for="festivalLocation" class="form-label fw-semibold">Location</label>
-                            <InputText id="festivalLocation" class="@GetInputClass(nameof(newFestival.Location))" @bind-Value="newFestival.Location" />
-                            <ValidationMessage For="@(() => newFestival.Location)" class="text-danger small" />
-                        </div>
+    .form-control {
+        background: rgba(30, 27, 75, 0.7);
+        border: 1px solid rgba(139, 92, 246, 0.4);
+        border-radius: 10px;
+        padding: 12px 16px;
+        color: white;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
 
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="festivalStartDate" class="form-label fw-semibold">Start Date</label>
-                                <InputDate id="festivalStartDate" class="@GetInputClass(nameof(newFestival.StartDate))" @bind-Value="newFestival.StartDate" />
-                                <ValidationMessage For="@(() => newFestival.StartDate)" class="text-danger small" />
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="festivalEndDate" class="form-label fw-semibold">End Date</label>
-                                <InputDate id="festivalEndDate" class="@GetInputClass(nameof(newFestival.EndDate))" @bind-Value="newFestival.EndDate" />
-                                <ValidationMessage For="@(() => newFestival.EndDate)" class="text-danger small" />
-                            </div>
-                        </div>
+        .form-control:focus {
+            outline: none;
+            border-color: #8b5cf6;
+            box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.3);
+            background: rgba(30, 27, 75, 0.85);
+        }
 
-                        <div class="d-grid mt-4">
-                            <button class="btn btn-primary btn-lg" type="submit">
-                                <i class="bi bi-calendar-plus me-2"></i>
-                                Add Festival
-                            </button>
-                        </div>
-                    </EditForm>
+        .form-control.is-valid {
+            border-color: #22c55e;
+        }
 
-                    @if (successMessage != null)
-                    {
-                        <div class="alert alert-success mt-4">@successMessage</div>
-                    }
-                </div>
+        .form-control.is-invalid {
+            border-color: #ef4444;
+        }
+
+    .text-danger.small {
+        font-size: 0.875rem;
+    }
+
+    .btn-submit {
+        background-color: #6366f1;
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 1rem;
+        box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+        transition: all 0.3s ease;
+    }
+
+        .btn-submit:hover {
+            background-color: #4f46e5;
+            transform: translateY(-1px);
+        }
+
+    .alert-success {
+        background: rgba(16, 185, 129, 0.2);
+        color: #10b981;
+        border: 1px solid rgba(16, 185, 129, 0.4);
+        padding: 1rem;
+        border-radius: 10px;
+        text-align: center;
+        margin-top: 1.5rem;
+    }
+</style>
+
+<div class="festival-form-container">
+    <h3>🎉 Add New Festival</h3>
+
+    <EditForm EditContext="@editContext" OnValidSubmit="AddNewFestival" FormName="AddNewFestival">
+        <DataAnnotationsValidator />
+        <ValidationSummary class="text-danger mb-3" />
+
+        <div class="mb-3">
+            <label for="festivalName" class="form-label">Name</label>
+            <InputText id="festivalName" class="@GetInputClass(nameof(newFestival.Name))" @bind-Value="newFestival.Name" />
+            <ValidationMessage For="@(() => newFestival.Name)" class="text-danger small" />
+        </div>
+
+        <div class="mb-3">
+            <label for="festivalLocation" class="form-label">Location</label>
+            <InputText id="festivalLocation" class="@GetInputClass(nameof(newFestival.Location))" @bind-Value="newFestival.Location" />
+            <ValidationMessage For="@(() => newFestival.Location)" class="text-danger small" />
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label for="festivalStartDate" class="form-label">Start Date</label>
+                <InputDate id="festivalStartDate" class="@GetInputClass(nameof(newFestival.StartDate))" @bind-Value="newFestival.StartDate" />
+                <ValidationMessage For="@(() => newFestival.StartDate)" class="text-danger small" />
+            </div>
+            <div class="col-md-6 mb-3">
+                <label for="festivalEndDate" class="form-label">End Date</label>
+                <InputDate id="festivalEndDate" class="@GetInputClass(nameof(newFestival.EndDate))" @bind-Value="newFestival.EndDate" />
+                <ValidationMessage For="@(() => newFestival.EndDate)" class="text-danger small" />
             </div>
         </div>
-    </div>
+
+        <div class="d-grid mt-4">
+            <button class="btn-submit" type="submit">
+                <i class="bi bi-calendar-plus me-2"></i>
+                Add Festival
+            </button>
+        </div>
+    </EditForm>
+
+    @if (successMessage != null)
+    {
+        <div class="alert-success">@successMessage</div>
+    }
 </div>
 
 @code {
@@ -73,18 +149,18 @@
         editContext = new EditContext(newFestival);
     }
 
-
     private async Task AddNewFestival()
     {
         await FestivalService.AddFestivalAsync(newFestival);
-        successMessage = "Festival added successfully!";
+        successMessage = "✅ Festival added successfully!";
 
         newFestival = new FestivalCreateDto
         {
             StartDate = DateTime.Today,
             EndDate = DateTime.Today
         };
-        editContext = new EditContext(newFestival); // reset the form
+
+        editContext = new EditContext(newFestival);
     }
 
     private string GetInputClass(string fieldName)
